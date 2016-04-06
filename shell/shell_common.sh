@@ -1,6 +1,6 @@
 # function
 _sc_pyenv_exec() {
-    source $HOME/.local/lib/python/bin/activate
+    source $HOME/.virtualenvs/default/bin/activate
     $@
     deactivate
 }
