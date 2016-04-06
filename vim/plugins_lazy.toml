@@ -1,0 +1,47 @@
+[[plugins]]
+repo = 'scrooloose/syntastic'
+on_ft = ['cpp', 'c', 'python', 'go']
+hook_add = '''
+    let g:syntastic_check_on_wq = 0
+    let g:syntastic_auto_loc_list = 0
+    let g:syntastic_python_checkers = ['pyflakes', 'pep8']
+    let g:syntastic_cpp_compiler = 'clang++'
+    let g:syntastic_cpp_compiler_options  = '-std=c++14 -Wall -Wextra -stdlib=libc++ -lc++abi'
+    let g:syntastic_c_compiler = 'clang'
+    let g:syntastic_c_compiler_options  = '-std=c11 -Wall'
+    let g:syntastic_go_checkers = ['go', 'golint']
+'''
+
+[[plugins]]
+repo = 'justmao945/vim-clang'
+on_ft = ['cpp', 'c']
+hook_add = '''
+    let g:clang_c_options = '-std=c11 -Wall'
+    let g:clang_cpp_options = '-std=c++14 -stdlib=libc++ -Wall'
+'''
+
+[[plugins]]
+repo = 'rhysd/vim-clang-format'
+on_ft = ['cpp', 'c']
+hook_add = '''
+    let g:clang_format#auto_format = 1
+'''
+
+[[plugins]]
+repo = 'plasticboy/vim-markdown'
+on_ft = ['markdown']
+hook_add = '''
+    let g:vim_markdown_folding_disabled=1
+'''
+
+[[plugins]]
+repo = 'godlygeek/tabular'
+on_ft = ['markdown']
+
+[[plugins]]
+repo = 'vim-jp/vim-go-extra'
+on_ft = ['go']
+
+[[plugins]]
+repo = 'Blackrush/vim-gocode'
+on_ft = ['go']
