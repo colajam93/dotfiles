@@ -1,6 +1,9 @@
-#!/bin/sh
+#!/bin/bash
 
-deinConfigDir=$HOME/.vim
-install -d $deinConfigDir
-install -m644 *.toml $deinConfigDir
-install -m644 vimrc $HOME/.vimrc
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+dein_config_dir=$HOME/.vim
+source $script_dir/../lib/dotfiles.sh
+install -d $dein_config_dir
+safe_install $script_dir/plugins.toml $dein_config_dir
+safe_install $script_dir/plugins_lazy.toml $dein_config_dir
+safe_install $script_dir/vimrc $HOME/.vimrc
