@@ -1,7 +1,0 @@
-[user]
-	email = fs.fake.g1@gmail.com
-	name = colajam93
-[push]
-	default = simple
-[alias]
-	co = checkout
