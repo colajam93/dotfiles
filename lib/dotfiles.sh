@@ -2,11 +2,11 @@ _yellow=$(tput setaf 3)
 _blue=$(tput setaf 4)
 _reset=$(tput sgr0)
 
-_print_warning() {
+print_warning() {
     echo "${_yellow}warning:${_reset} $1"
 }
 
-_print_information() {
+print_information() {
     echo "${_blue}information:${_reset} $1"
 }
 
@@ -36,15 +36,15 @@ safe_install() {
     # overwrite check
     if $(cmp -s $srcfile $distfile); then
     # same file
-        _print_information "skipped ${distfile}"
+        print_information "skipped ${distfile}"
         return 0
     elif [[ -e $distfile ]]; then
     # distfile already exists
-        _print_warning "${distfile} saved as ${distfile}.dotnew"
+        print_warning "${distfile} saved as ${distfile}.dotnew"
         distfile=$distfile.dotnew
     fi
 
-    _print_information "installed in ${distfile}"
+    print_information "installed in ${distfile}"
     install -m644 $srcfile $distfile
 }
 
