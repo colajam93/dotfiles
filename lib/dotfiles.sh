@@ -48,3 +48,20 @@ safe_install() {
     install -m644 $srcfile $distfile
 }
 
+dotfile_install() {
+    if [[ $# -ne 2 ]]; then
+        return 1
+    fi
+
+    # destination file
+    if ! [[ $1 == .* ]] && [[ -d $2 ]]; then
+        # src is dotfile and dist is directory
+        filename=$(basename $1)
+        distfile=$(readlink -m $2/.$filename)
+    else
+        # do nothing
+        distfile=$2
+    fi
+
+    safe_install $1 $distfile
+}
