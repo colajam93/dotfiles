@@ -52,5 +52,10 @@ _sc_rlwrap_alias() {
 }
 
 _sc_rlwrap_alias sbcl
+_sc_rlwrap_alias maxima
 
 unset -f _sc_rlwrap_alias
+
+if [[ -f /usr/bin/virtualenvwrapper_lazy.sh ]]; then
+    source /usr/bin/virtualenvwrapper_lazy.sh
+fi
