@@ -5,19 +5,9 @@
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
-alias ls='ls --color=auto'
-alias cp='cp -i'
-alias mv='mv -i'
-alias rm='rm -i'
-alias grep='grep --color=auto'
-alias tmux='tmux -2'
 PS1='[\u@\h \W]\$ '
-export EDITOR=vim
-export SYSTEMD_EDITOR=$EDITOR
+
 complete -cf sudo
 complete -cf man
-export COCOS_CONSOLE_ROOT=$HOME/local/cocos2d-x/tools/cocos2d-console/bin
-export GOPATH=$HOME/local/go
-export PATH=$HOME/.local/bin:$PATH:$COCOS_CONSOLE_ROOT:$GOPATH/bin
 
 source $HOME/.shell_common.sh

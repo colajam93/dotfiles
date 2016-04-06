@@ -39,7 +39,7 @@ docker-cleanup() {
 # alias
 # pyenv
 _sc_pyenv_alias() {
-    alias $1='_sc_pyenv_exec '$1
+    alias "$1=_sc_pyenv_exec $1"
 }
 
 _sc_pyenv_alias yapf
@@ -48,13 +48,33 @@ unset -f _sc_pyenv_alias
 
 # rlwrap
 _sc_rlwrap_alias() {
-    alias $1='rlwrap '$1
+    alias "$1=rlwrap $1"
 }
 
 _sc_rlwrap_alias sbcl
 _sc_rlwrap_alias maxima
 
 unset -f _sc_rlwrap_alias
+
+
+if ls --version 2> /dev/null | grep -q 'coreutils'; then
+    alias ls='ls --color=auto'
+else
+    alias ls='ls -G'
+fi
+
+alias cp='cp -i'
+alias mv='mv -i'
+alias rm='rm -i'
+alias grep='grep --color=auto'
+alias tmux='tmux -2'
+
+# environment variable
+export EDITOR=vim
+export SYSTEMD_EDITOR=$EDITOR
+COCOS=$HOME/local/cocos2d-x/tools/cocos2d-console/bin
+export GOPATH=$HOME/local/go
+export PATH=$HOME/.local/bin:$PATH:$COCOS:$GOPATH/bin
 
 if [[ -f /usr/bin/virtualenvwrapper_lazy.sh ]]; then
     source /usr/bin/virtualenvwrapper_lazy.sh
