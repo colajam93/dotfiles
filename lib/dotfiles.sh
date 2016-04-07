@@ -2,6 +2,19 @@ _yellow=$(tput setaf 3)
 _blue=$(tput setaf 4)
 _reset=$(tput sgr0)
 
+_gnu_readlink_f() {
+    pushd $(pwd -P) > /dev/null 2>&1
+    TARGET_FILE=$1
+    while [[ "$TARGET_FILE" != "" ]]; do
+        cd $(dirname $TARGET_FILE)
+        FILENAME=$(basename $TARGET_FILE)
+        TARGET_FILE=$(readlink $FILENAME)
+    done
+
+    echo "$(pwd -P)/$FILENAME"
+    popd > /dev/null 2>&1
+}
+
 print_warning() {
     echo "${_yellow}warning:${_reset} $1"
 }
@@ -19,7 +32,7 @@ safe_install() {
 
     # source file
     if [[ -e $1 ]]; then
-        srcfile=$(readlink -m $1)
+        srcfile=$(_gnu_readlink_f $1)
     else
         echo "$1: No such file or directory"
         return 1
@@ -28,9 +41,9 @@ safe_install() {
     # destination file
     if [[ -d $2 ]]; then
         filename=$(basename $srcfile)
-        distfile=$(readlink -m $2/$filename)
+        distfile=$(_gnu_readlink_f $2/$filename)
     else
-        distfile=$(readlink -m $2)
+        distfile=$(_gnu_readlink_f $2)
     fi
 
     # overwrite check
@@ -57,7 +70,7 @@ dotfile_install() {
     if ! [[ $1 == .* ]] && [[ -d $2 ]]; then
         # src is dotfile and dist is directory
         filename=$(basename $1)
-        distfile=$(readlink -m $2/.$filename)
+        distfile=$(_gnu_readlink_f $2/.$filename)
     else
         # do nothing
         distfile=$2
