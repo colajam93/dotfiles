@@ -1,11 +1,11 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 exec_install() {
     dir=$1
     shift
-    sh "${script_dir}/${dir}/install.sh" $@
+    bash "${script_dir}/${dir}/install.sh" $@
 }
 
 exec_install misc $@
