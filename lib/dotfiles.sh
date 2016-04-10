@@ -54,11 +54,28 @@ safe_install() {
     elif [[ -e $distfile ]]; then
     # distfile already exists
         print_warning "${distfile} saved as ${distfile}.dotnew"
+        distfile_old=$distfile
+        distfile_new=$distfile.dotnew
         distfile=$distfile.dotnew
     fi
 
     print_information "installed in ${distfile}"
     install -m644 $srcfile $distfile
+
+    if [[ $distfile_new != '' ]]; then
+        if type colordiff > /dev/null 2>&1; then
+            diff_command='colordiff'
+        else
+            diff_command='diff'
+        fi
+        eval "$diff_command -u $distfile_old $distfile_new"
+        echo "overwrite $distfile_old by new file? [y/N]"
+        read input
+        if [[ $input == 'y' ]]; then
+            mv $distfile_new $distfile_old
+            print_information "mv $distfile_new $distfile_old"
+        fi
+    fi
 }
 
 dotfile_install() {
@@ -68,7 +85,7 @@ dotfile_install() {
 
     # destination file
     if ! [[ $1 == .* ]] && [[ -d $2 ]]; then
-        # src is dotfile and dist is directory
+        # src is not dotfile and dist is directory
         filename=$(basename $1)
         distfile=$(_gnu_readlink_f $2/.$filename)
     else
