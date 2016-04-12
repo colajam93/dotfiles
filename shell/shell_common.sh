@@ -76,6 +76,7 @@ COCOS=$HOME/local/cocos2d-x/tools/cocos2d-console/bin
 export GOPATH=$HOME/local/go
 export PATH=$HOME/.local/bin:$PATH:$COCOS:$GOPATH/bin
 
-if [[ -f /usr/bin/virtualenvwrapper_lazy.sh ]]; then
-    source /usr/bin/virtualenvwrapper_lazy.sh
+vewl="virtualenvwrapper_lazy.sh"
+if type $vewl > /dev/null 2>&1; then
+    source $(which $vewl)
 fi
