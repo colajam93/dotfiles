@@ -39,7 +39,14 @@ hook_add = '''
 repo = 'kannokanno/previm'
 on_ft = ['markdown']
 hook_add = '''
-    let g:previm_open_cmd = 'open -a "Google Chrome"'
+    if has("unix")
+        let s:uname_s = system("uname -s")
+        if s:uname_s == "Darwin"
+            let g:previm_open_cmd = 'open -a "Google Chrome"'
+        elseif s:uname_s == "Linux"
+            let g:previm_open_cmd = 'chromium'
+        endif
+    endif
 '''
 
 [[plugins]]
