@@ -36,6 +36,13 @@ hook_add = '''
 '''
 
 [[plugins]]
+repo = 'kannokanno/previm'
+on_ft = ['markdown']
+hook_add = '''
+    let g:previm_open_cmd = 'open -a "Google Chrome"'
+'''
+
+[[plugins]]
 repo = 'godlygeek/tabular'
 on_ft = ['markdown']
 
