@@ -32,12 +32,13 @@ safe_install() {
 
     # source file
     if [[ -e $1 ]]; then
-        srcfile=$(_gnu_readlink_f $1)
+        local srcfile=$(_gnu_readlink_f $1)
     else
         echo "$1: No such file or directory"
         return 1
     fi
         
+    local distfile
     # destination file
     if [[ -d $2 ]]; then
         filename=$(basename $srcfile)
@@ -54,8 +55,8 @@ safe_install() {
     elif [[ -e $distfile ]]; then
     # distfile already exists
         print_warning "${distfile} saved as ${distfile}.dotnew"
-        distfile_old=$distfile
-        distfile_new=$distfile.dotnew
+        local distfile_old=$distfile
+        local distfile_new=$distfile.dotnew
         distfile=$distfile.dotnew
     fi
 
@@ -84,9 +85,10 @@ dotfile_install() {
     fi
 
     # destination file
+    local distfile
     if ! [[ $1 == .* ]] && [[ -d $2 ]]; then
         # src is not dotfile and dist is directory
-        filename=$(basename $1)
+        local filename=$(basename $1)
         distfile=$(_gnu_readlink_f $2/.$filename)
     else
         # do nothing
