@@ -13,7 +13,7 @@ status.register("alsa",
 
 # Displays speaker state
 status.register("alsa",
-                format="♪Speaker",
+                format="♪SPEAKER",
                 format_muted="",
                 mixer="Speaker",
                 color="#FF0000",
@@ -64,7 +64,7 @@ status.register('mem',
 status.register("disk",
                 path="/",
                 interval=300,
-                format="Disk:{avail}GB")
+                format="DISK:{avail}GB")
 
 # NowPlaying
 status.register('now_playing',
