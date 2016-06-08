@@ -14,7 +14,7 @@ exec_package() {
 }
 
 package_default() {
-    local list=("core" "develop" "oh-my-zsh" "shell" "vim")
+    local list=("core" "develop" "oh-my-zsh" "script" "shell" "vim")
     exec_package "${list[@]}"
 }
 
@@ -24,7 +24,7 @@ package_simple() {
 }
 
 package_all() {
-    local list=("core" "develop" "extra" "i3" "oh-my-zsh" "shell" "vim")
+    local list=("core" "develop" "extra" "i3" "oh-my-zsh" "script" "shell" "vim")
     exec_package "${list[@]}"
 }
 
