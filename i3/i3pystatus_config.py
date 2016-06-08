@@ -31,16 +31,19 @@ status.register("battery",
                 })
 
 # netctl-auto profile
+command = r'r=$(netctl-auto current); [[ $r == "" ]] ' \
+          r'&& echo "<span></span>" ' \
+          r'|| echo "<span color=\"#00FF00\">@$r</span>"'
 status.register('shell',
-                command='netctl-auto current',
-                color='#00FF00',
-                interval=60)
+                command=command,
+                hints={'markup': 'pango'})
 
 # Displays wifi status
 status.register("network",
                 interface="wlp3s0",
                 format_up="WL:{v4cidr}",
-                format_down="WL:DOWN")
+                format_down="WL:DOWN",
+                hints={"separator": False, "separator_block_width": 0})
 
 # Ethernet
 status.register('network',
@@ -55,6 +58,7 @@ status.register("runwatch",
                 path="/var/run/ppp*.pid",
                 format_down="")
 
+# Memory usage
 status.register('mem',
                 format='MEM:{percent_used_mem}%',
                 warn_percentage=60,
