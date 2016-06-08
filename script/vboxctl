@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+
+import argparse
+import subprocess
+
+LIST, RUN = ('list', 'run')
+V_BOX_MANAGE = 'VBoxManage'
+
+
+def do_list(_):
+    result = subprocess.run([V_BOX_MANAGE, 'list', 'vms'], stdout=subprocess.PIPE)
+    print(result.stdout.decode().strip())
+
+
+def do_run(args):
+    command = [V_BOX_MANAGE, 'startvm', args.target, '--type']
+    if args.with_gui:
+        command.append('gui')
+    else:
+        command.append('headless')
+    subprocess.run(command)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(dest='command')
+    subparsers.required = True
+    parser_list = subparsers.add_parser(LIST)
+    parser_list.set_defaults(func=do_list)
+    parser_run = subparsers.add_parser(RUN)
+    parser_run.add_argument('target')
+    parser_run.add_argument('-g', '--with-gui', action='store_true')
+    parser_run.set_defaults(func=do_run)
+    args = parser.parse_args()
+    args.func(args)
+
+
+if __name__ == '__main__':
+    main()
