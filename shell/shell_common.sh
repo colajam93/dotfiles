@@ -36,6 +36,14 @@ docker-cleanup() {
     fi
 }
 
+login-all-machine() {
+    for i in $(machinectl | tail -n +2 | head -n -2 | cut -d ' ' -f 1); do
+        echo "Login to $i"
+        sudo machinectl login $i
+        sleep 1
+    done
+}
+
 # alias
 # pyenv
 _sc_pyenv_alias() {
