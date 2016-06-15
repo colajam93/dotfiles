@@ -88,3 +88,6 @@ vewl="virtualenvwrapper_lazy.sh"
 if type $vewl > /dev/null 2>&1; then
     source $(which $vewl)
 fi
+
+# load environment specific file
+[[ -f ~/.shell_extra ]] && . ~/.shell_extra
