@@ -3,7 +3,7 @@
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 exec_script() {
-    bash "${script_dir}/$1/install.sh"
+    bash "${script_dir}/$1/install.sh" $force
 }
 
 exec_package() {
@@ -31,11 +31,38 @@ package_all() {
 
 # main
 
+# parse options
+force=1
+for OPT in "$@"
+do
+    case "$OPT" in
+        '-f'|'--force' )
+            force=0
+            shift 1
+            ;;
+        '--'|'-' )
+            shift 1
+            param+=( "$@" )
+            break
+            ;;
+        -*)
+            echo "$PROGNAME: illegal option -- '$(echo $1 | sed 's/^-*//')'" 1>&2
+            exit 1
+            ;;
+        *)
+            if [[ ! -z "$1" ]] && [[ ! "$1" =~ ^-+ ]]; then
+                param+=( "$1" )
+                shift 1
+            fi
+            ;;
+    esac
+done
+
 # default: install default package
-if [[ "$#" == 0 ]]; then
+if [[ -z ${param} ]]; then
     target='default'
 else
-    target="$1"
+    target="${param[0]}"
 fi
 
 if [[ "${target}" == 'default' ]]; then
