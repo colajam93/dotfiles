@@ -90,4 +90,4 @@ if type $vewl > /dev/null 2>&1; then
 fi
 
 # load environment specific file
-[[ -f ~/.shell_extra ]] && . ~/.shell_extra
+[[ -f ~/.shell_extra.sh ]] && . ~/.shell_extra.sh
