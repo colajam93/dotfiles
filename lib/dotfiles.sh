@@ -15,6 +15,13 @@ _gnu_readlink_f() {
     popd > /dev/null 2>&1
 }
 
+_overwrite_file() {
+    local distfile_new=$1
+    local distfile_old=$2
+    mv $distfile_new $distfile_old
+    print_information "mv $distfile_new $distfile_old"
+}
+
 print_warning() {
     echo "${_yellow}warning:${_reset} $1"
 }
@@ -64,17 +71,20 @@ safe_install() {
     install -m644 $srcfile $distfile
 
     if [[ $distfile_new != '' ]]; then
-        if type colordiff > /dev/null 2>&1; then
-            diff_command='colordiff'
+        if [[ "$_dotfiles_force" = true ]]; then
+            _overwrite_file $distfile_new $distfile_old
         else
-            diff_command='diff'
-        fi
-        eval "$diff_command -u $distfile_old $distfile_new"
-        echo "overwrite $distfile_old by new file? [y/N]"
-        read input
-        if [[ $input == 'y' ]]; then
-            mv $distfile_new $distfile_old
-            print_information "mv $distfile_new $distfile_old"
+            if type colordiff > /dev/null 2>&1; then
+                diff_command='colordiff'
+            else
+                diff_command='diff'
+            fi
+            eval "$diff_command -u $distfile_old $distfile_new"
+            echo "overwrite $distfile_old by new file? [y/N]"
+            read input
+            if [[ $input == 'y' ]]; then
+                _overwrite_file $distfile_new $distfile_old
+            fi
         fi
     fi
 }

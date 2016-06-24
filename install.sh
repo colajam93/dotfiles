@@ -3,7 +3,7 @@
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 exec_script() {
-    bash "${script_dir}/$1/install.sh" $force
+    bash "${script_dir}/$1/install.sh"
 }
 
 exec_package() {
@@ -32,12 +32,12 @@ package_all() {
 # main
 
 # parse options
-force=1
+force=false
 for OPT in "$@"
 do
     case "$OPT" in
         '-f'|'--force' )
-            force=0
+            force=true
             shift 1
             ;;
         '--'|'-' )
@@ -58,6 +58,8 @@ do
     esac
 done
 
+export _dotfiles_force=$force
+
 # default: install default package
 if [[ -z ${param} ]]; then
     target='default'
@@ -74,3 +76,5 @@ elif [[ "${target}" == 'all' ]]; then
 else
     exec_package "${target}"
 fi
+
+unset _dotfiles_force
