@@ -137,6 +137,6 @@ install_all() {
     local excludes="$(join '\|' $(_exact_match 'install.sh' $@))"
     local i
     for i in $(ls -1 $target_dir | grep -v $excludes); do
-        dotfile_install $(_gnu_readlink_f $i) $HOME
+        dotfile_install "$(_gnu_readlink_f $target_dir/$i)" $HOME
     done
 }
