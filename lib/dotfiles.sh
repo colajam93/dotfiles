@@ -4,10 +4,10 @@ _reset=$(tput sgr0 2> /dev/null)
 
 _gnu_readlink_f() {
     pushd $(pwd -P) > /dev/null 2>&1
-    TARGET_FILE=$1
+    local TARGET_FILE=$1
     while [[ "$TARGET_FILE" != "" ]]; do
         cd $(dirname $TARGET_FILE)
-        FILENAME=$(basename $TARGET_FILE)
+        local FILENAME=$(basename $TARGET_FILE)
         TARGET_FILE=$(readlink $FILENAME)
     done
 
@@ -22,7 +22,7 @@ _overwrite_file() {
     print_information "mv $distfile_new $distfile_old"
 }
 
-_exact_match() {
+_backward_match() {
     local i
     for i in $@; do
         printf "%s$\n" $i
@@ -97,6 +97,7 @@ safe_install() {
         if [[ "$_dotfiles_force" = true ]]; then
             _overwrite_file $distfile_new $distfile_old
         else
+            local diff_command
             if type colordiff > /dev/null 2>&1; then
                 diff_command='colordiff'
             else
@@ -104,6 +105,7 @@ safe_install() {
             fi
             eval "$diff_command -u $distfile_old $distfile_new"
             echo "overwrite $distfile_old by new file? [y/N]"
+            local input
             read input
             if [[ $input == 'y' ]]; then
                 _overwrite_file $distfile_new $distfile_old
@@ -134,7 +136,7 @@ dotfile_install() {
 install_all() {
     local target_dir=$1
     shift
-    local excludes="$(join '|' $(_exact_match 'install.sh' $@))"
+    local excludes="$(join '|' $(_backward_match 'install.sh' $@))"
     local i
     for i in $(find $target_dir -maxdepth 1 -type f | egrep -v $excludes); do
         dotfile_install "$(_gnu_readlink_f $i)" $HOME
