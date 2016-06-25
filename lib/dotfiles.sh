@@ -23,11 +23,15 @@ _overwrite_file() {
 }
 
 print_warning() {
-    echo "${_yellow}warning:${_reset} $1"
+    if [[ "$_dotfiles_quiet" = false ]]; then
+        echo "${_yellow}warning:${_reset} $1"
+    fi
 }
 
 print_information() {
-    echo "${_blue}information:${_reset} $1"
+    if [[ "$_dotfiles_quiet" = false ]]; then
+        echo "${_blue}information:${_reset} $1"
+    fi
 }
 
 safe_install() {

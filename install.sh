@@ -33,11 +33,16 @@ package_all() {
 
 # parse options
 force=false
+quiet=false
 for OPT in "$@"
 do
     case "$OPT" in
         '-f'|'--force' )
             force=true
+            shift 1
+            ;;
+        '-q'|'--quiet' )
+            quiet=true
             shift 1
             ;;
         '--'|'-' )
@@ -59,6 +64,7 @@ do
 done
 
 export _dotfiles_force=$force
+export _dotfiles_quiet=$quiet
 
 # default: install default package
 if [[ -z ${param} ]]; then
@@ -78,3 +84,4 @@ else
 fi
 
 unset _dotfiles_force
+unset _dotfiles_quiet
