@@ -22,6 +22,25 @@ _overwrite_file() {
     print_information "mv $distfile_new $distfile_old"
 }
 
+_exact_match() {
+    local i
+    for i in $@; do
+        printf "^%s$\n" $i
+    done
+}
+
+join() {
+    local d=$1
+    shift
+    if [[ $# -eq 0 ]]; then
+        echo ''
+        return 1
+    fi
+    echo -n "$1"
+    shift
+    printf "%s" "${@/#/$d}"
+}
+
 print_warning() {
     if [[ "$_dotfiles_quiet" = false ]]; then
         echo "${_yellow}warning:${_reset} $1"
@@ -110,4 +129,14 @@ dotfile_install() {
     fi
 
     safe_install $1 $distfile
+}
+
+install_all() {
+    local target_dir=$1
+    shift
+    local excludes="$(join '\|' $(_exact_match 'install.sh' $@))"
+    local i
+    for i in $(ls -1 $target_dir | grep -v $excludes); do
+        dotfile_install $(_gnu_readlink_f $i) $HOME
+    done
 }
