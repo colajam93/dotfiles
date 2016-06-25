@@ -31,12 +31,6 @@ print_information() {
 }
 
 safe_install() {
-    # check argc
-    if [[ $# -ne 2 ]]; then
-        echo 'usage: safe_install [src] [dist]'
-        return 1
-    fi
-
     # source file
     if [[ -e $1 ]]; then
         local srcfile=$(_gnu_readlink_f $1)
@@ -45,13 +39,19 @@ safe_install() {
         return 1
     fi
         
-    local distfile
     # destination file
+    local distfile
     if [[ -d $2 ]]; then
-        filename=$(basename $srcfile)
+        local filename=$(basename $srcfile)
         distfile=$(_gnu_readlink_f $2/$filename)
     else
         distfile=$(_gnu_readlink_f $2)
+    fi
+
+    # if argc == 3, use it as permission mode which pass to install -m
+    local permission='644'
+    if [[ $# -eq 3 ]]; then
+        permission=$3
     fi
 
     # overwrite check
@@ -68,7 +68,7 @@ safe_install() {
     fi
 
     print_information "installed in ${distfile}"
-    install -m644 $srcfile $distfile
+    install -m $permission $srcfile $distfile
 
     if [[ $distfile_new != '' ]]; then
         if [[ "$_dotfiles_force" = true ]]; then
