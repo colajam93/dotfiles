@@ -16,10 +16,10 @@ _gnu_readlink_f() {
 }
 
 _overwrite_file() {
-    local distfile_new=$1
-    local distfile_old=$2
-    mv $distfile_new $distfile_old
-    print_information "mv $distfile_new $distfile_old"
+    local destfile_new=$1
+    local destfile_old=$2
+    mv $destfile_new $destfile_old
+    print_information "mv $destfile_new $destfile_old"
 }
 
 _backward_match() {
@@ -63,12 +63,12 @@ safe_install() {
     fi
         
     # destination file
-    local distfile
+    local destfile
     if [[ -d $2 ]]; then
         local filename=$(basename $srcfile)
-        distfile=$(_gnu_readlink_f $2/$filename)
+        destfile=$(_gnu_readlink_f $2/$filename)
     else
-        distfile=$(_gnu_readlink_f $2)
+        destfile=$(_gnu_readlink_f $2)
     fi
 
     # if argc == 3, use it as permission mode which pass to install -m
@@ -78,24 +78,24 @@ safe_install() {
     fi
 
     # overwrite check
-    if $(cmp -s $srcfile $distfile); then
+    if $(cmp -s $srcfile $destfile); then
     # same file
-        print_information "skipped ${distfile}"
+        print_information "skipped ${destfile}"
         return 0
-    elif [[ -e $distfile ]]; then
-    # distfile already exists
-        print_warning "${distfile} saved as ${distfile}.dotnew"
-        local distfile_old=$distfile
-        local distfile_new=$distfile.dotnew
-        distfile=$distfile.dotnew
+    elif [[ -e $destfile ]]; then
+    # destfile already exists
+        print_warning "${destfile} saved as ${destfile}.dotnew"
+        local destfile_old=$destfile
+        local destfile_new=$destfile.dotnew
+        destfile=$destfile.dotnew
     fi
 
-    print_information "installed in ${distfile}"
-    install -m $permission $srcfile $distfile
+    print_information "installed in ${destfile}"
+    install -m $permission $srcfile $destfile
 
-    if [[ $distfile_new != '' ]]; then
+    if [[ $destfile_new != '' ]]; then
         if [[ "$_dotfiles_force" = true ]]; then
-            _overwrite_file $distfile_new $distfile_old
+            _overwrite_file $destfile_new $destfile_old
         else
             local diff_command
             if type colordiff > /dev/null 2>&1; then
@@ -103,12 +103,12 @@ safe_install() {
             else
                 diff_command='diff'
             fi
-            eval "$diff_command -u $distfile_old $distfile_new"
-            echo "overwrite $distfile_old by new file? [y/N]"
+            eval "$diff_command -u $destfile_old $destfile_new"
+            echo "overwrite $destfile_old by new file? [y/N]"
             local input
             read input
             if [[ $input == 'y' ]]; then
-                _overwrite_file $distfile_new $distfile_old
+                _overwrite_file $destfile_new $destfile_old
             fi
         fi
     fi
@@ -120,17 +120,17 @@ dotfile_install() {
     fi
 
     # destination file
-    local distfile
+    local destfile
     if ! [[ $1 == .* ]] && [[ -d $2 ]]; then
-        # src is not dotfile and dist is directory
+        # src is not dotfile and dest is directory
         local filename=$(basename $1)
-        distfile=$(_gnu_readlink_f $2/.$filename)
+        destfile=$(_gnu_readlink_f $2/.$filename)
     else
         # do nothing
-        distfile=$2
+        destfile=$2
     fi
 
-    safe_install $1 $distfile
+    safe_install $1 $destfile
 }
 
 install_all() {
