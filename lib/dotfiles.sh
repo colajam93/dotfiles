@@ -25,7 +25,7 @@ _overwrite_file() {
 _exact_match() {
     local i
     for i in $@; do
-        printf "^%s$\n" $i
+        printf "%s$\n" $i
     done
 }
 
@@ -136,7 +136,7 @@ install_all() {
     shift
     local excludes="$(join '\|' $(_exact_match 'install.sh' $@))"
     local i
-    for i in $(ls -1 $target_dir | grep -v $excludes); do
-        dotfile_install "$(_gnu_readlink_f $target_dir/$i)" $HOME
+    for i in $(find $target_dir -maxdepth 1 -type f | grep -v $excludes); do
+        dotfile_install "$(_gnu_readlink_f $i)" $HOME
     done
 }

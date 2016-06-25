@@ -7,5 +7,4 @@ dein_config_dir=$HOME/.vim
 install -d $dein_config_dir
 safe_install $script_dir/plugins.toml $dein_config_dir
 safe_install $script_dir/plugins_lazy.toml $dein_config_dir
-dotfile_install $script_dir/vimrc $HOME
-dotfile_install $script_dir/gvimrc $HOME
+install_all $script_dir plugins.toml plugins_lazy.toml
