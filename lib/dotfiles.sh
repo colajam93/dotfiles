@@ -1,6 +1,6 @@
-_yellow=$(tput setaf 3)
-_blue=$(tput setaf 4)
-_reset=$(tput sgr0)
+_yellow=$(tput setaf 3 2> /dev/null)
+_blue=$(tput setaf 4 2> /dev/null)
+_reset=$(tput sgr0 2> /dev/null)
 
 _gnu_readlink_f() {
     pushd $(pwd -P) > /dev/null 2>&1
