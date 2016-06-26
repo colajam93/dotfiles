@@ -5,7 +5,8 @@ import subprocess
 import re
 import sys
 
-LIST, LIST_VMS, START, POWEROFF, LOGIN = ('list', 'list-vms', 'start', 'poweroff', 'login')
+LIST, LIST_VMS, START, POWEROFF, LOGIN, CLONE, REMOVE = (
+    'list', 'list-vms', 'start', 'poweroff', 'login', 'clone', 'remove')
 V_BOX_MANAGE = 'VBoxManage'
 
 
@@ -107,6 +108,16 @@ def do_login(args):
     run_with_exit_code(command)
 
 
+def do_clone(args):
+    command = [V_BOX_MANAGE, 'clonevm', args.target, '--mode', 'machine', '--name', args.name, '--register']
+    run_with_exit_code(command)
+
+
+def do_remove(args):
+    command = [V_BOX_MANAGE, 'unregistervm', args.target, '--delete']
+    run_with_exit_code(command)
+
+
 def main():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest='command')
@@ -133,6 +144,15 @@ def main():
     parser_login = subparsers.add_parser(LOGIN)
     parser_login.add_argument('target')
     parser_login.set_defaults(func=do_login, parser=parser_login)
+
+    parser_clone = subparsers.add_parser(CLONE)
+    parser_clone.add_argument('target')
+    parser_clone.add_argument('name')
+    parser_clone.set_defaults(func=do_clone, parser=parser_clone)
+
+    parser_remove = subparsers.add_parser(REMOVE)
+    parser_remove.add_argument('target')
+    parser_remove.set_defaults(func=do_remove, parser=parser_remove)
 
     args = parser.parse_args()
     args.func(args)
