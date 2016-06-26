@@ -5,7 +5,7 @@ import subprocess
 import re
 import sys
 
-LIST, START, POWEROFF = ('list', 'start', 'poweroff')
+LIST, LIST_VMS, START, POWEROFF = ('list', 'list-vms', 'start', 'poweroff')
 V_BOX_MANAGE = 'VBoxManage'
 
 
@@ -57,6 +57,10 @@ def run_with_exit_code(command):
 
 
 def do_list(_):
+    print(list_running_vms())
+
+
+def do_list_vms(_):
     print(list_vms())
 
 
@@ -105,6 +109,9 @@ def main():
 
     parser_list = subparsers.add_parser(LIST)
     parser_list.set_defaults(func=do_list, parser=parser_list)
+
+    parser_list_vms = subparsers.add_parser(LIST_VMS)
+    parser_list_vms.set_defaults(func=do_list_vms, parser=parser_list_vms)
 
     parser_start = subparsers.add_parser(START)
     parser_start.add_argument('target', nargs='?')
