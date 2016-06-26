@@ -9,6 +9,10 @@ LIST, START, POWEROFF = ('list', 'start', 'poweroff')
 V_BOX_MANAGE = 'VBoxManage'
 
 
+class NoChoiceError(Exception):
+    pass
+
+
 def list_vms():
     completed = subprocess.run([V_BOX_MANAGE, 'list', 'vms'], stdout=subprocess.PIPE)
     return completed.stdout.decode().strip()
@@ -22,7 +26,7 @@ def list_running_vms():
 def interactive_choice(choices):
     choices = list(filter(None, choices))
     if not len(choices):
-        return None
+        raise NoChoiceError
     pattern = re.compile(
         r'"(?P<name>[a-zA-Z0-9 ]+)" '
         r'{(?P<uuid>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})}')
@@ -34,14 +38,17 @@ def interactive_choice(choices):
     try:
         return uuids[int(input('>>> ').strip())]
     except (EOFError, ValueError, IndexError):
-        return None
+        raise ValueError
 
 
 def get_target(args, interactive_list):
     if args.interactive:
         return interactive_choice(interactive_list)
     else:
-        return args.target
+        if not args.target:
+            raise ValueError
+        else:
+            return args.target
 
 
 def run_with_exit_code(command):
@@ -54,9 +61,12 @@ def do_list(_):
 
 
 def do_start(args):
-    target = get_target(args, list_vms().split('\n'))
-
-    if not target:
+    try:
+        target = get_target(args, list_vms().split('\n'))
+    except NoChoiceError:
+        print('No vms')
+        sys.exit(1)
+    except ValueError:
         args.parser.print_help()
         sys.exit(1)
 
@@ -70,9 +80,12 @@ def do_start(args):
 
 
 def do_poweroff(args):
-    target = get_target(args, list_running_vms().split('\n'))
-
-    if not target:
+    try:
+        target = get_target(args, list_running_vms().split('\n'))
+    except NoChoiceError:
+        print('No running vms')
+        sys.exit(1)
+    except ValueError:
         args.parser.print_help()
         sys.exit(1)
 
