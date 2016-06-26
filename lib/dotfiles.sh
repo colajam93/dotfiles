@@ -71,27 +71,27 @@ safe_install() {
         destfile=$(_gnu_readlink_f $2)
     fi
 
-    # if argc == 3, use it as permission mode which pass to install -m
+    # if argc == 3, use 3rd argument as permission mode which pass to install -m
     local permission='644'
     if [[ $# -eq 3 ]]; then
         permission=$3
     fi
 
     # overwrite check
-    if $(cmp -s $srcfile $destfile); then
     # same file
+    if $(cmp -s $srcfile $destfile); then
         print_information "skipped ${destfile}"
         return 0
-    elif [[ -e $destfile ]]; then
     # destfile already exists
-        print_warning "${destfile} saved as ${destfile}.dotnew"
+    elif [[ -e $destfile ]]; then
         local destfile_old=$destfile
         local destfile_new=$destfile.dotnew
-        destfile=$destfile.dotnew
+        destfile=$destfile_new
+        print_warning "${destfile} saved as ${destfile}.dotnew"
     fi
 
-    print_information "installed in ${destfile}"
     install -m $permission $srcfile $destfile
+    print_information "installed in ${destfile}"
 
     if [[ $destfile_new != '' ]]; then
         if [[ "$_dotfiles_force" = true ]]; then
@@ -121,12 +121,12 @@ dotfile_install() {
 
     # destination file
     local destfile
+    # src is not dotfile and dest is directory
     if ! [[ $1 == .* ]] && [[ -d $2 ]]; then
-        # src is not dotfile and dest is directory
         local filename=$(basename $1)
         destfile=$(_gnu_readlink_f $2/.$filename)
+    # do nothing
     else
-        # do nothing
         destfile=$2
     fi
 
