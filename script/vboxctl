@@ -5,7 +5,7 @@ import subprocess
 import re
 import sys
 
-LIST, START = ('list', 'start')
+LIST, START, POWEROFF = ('list', 'start', 'poweroff')
 V_BOX_MANAGE = 'VBoxManage'
 
 
@@ -14,40 +14,75 @@ def list_vms():
     return completed.stdout.decode().strip()
 
 
+def list_running_vms():
+    completed = subprocess.run([V_BOX_MANAGE, 'list', 'runningvms'], stdout=subprocess.PIPE)
+    return completed.stdout.decode().strip()
+
+
+def interactive_choice(choices):
+    choices = list(filter(None, choices))
+    if not len(choices):
+        return None
+    pattern = re.compile(
+        r'"(?P<name>[a-zA-Z0-9 ]+)" '
+        r'{(?P<uuid>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})}')
+    vms = list(map(lambda x: re.match(pattern, x), choices))
+    uuids = []
+    for index, value in enumerate(vms):
+        uuids.append(value.group('uuid'))
+        print('{}: {}'.format(index, value.group('name')))
+    try:
+        return uuids[int(input('>>> ').strip())]
+    except (EOFError, ValueError, IndexError):
+        return None
+
+
+def get_target(args, interactive_list):
+    if args.interactive:
+        return interactive_choice(interactive_list)
+    else:
+        return args.target
+
+
+def run_with_exit_code(command):
+    completed = subprocess.run(command)
+    sys.exit(completed.returncode)
+
+
 def do_list(_):
     print(list_vms())
 
 
 def do_start(args):
-    def interactive_choice():
-        pattern = re.compile(
-            r'"(?P<name>[a-zA-Z0-9 ]+)" '
-            r'{(?P<uuid>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})}')
-        vms = map(lambda x: re.match(pattern, x), list_vms().split('\n'))
-        uuids = []
-        for index, value in enumerate(vms):
-            uuids.append(value.group('uuid'))
-            print('{}: {}'.format(index, value.group('name')))
-        try:
-            return uuids[int(input('>>> ').strip())]
-        except (EOFError, ValueError, IndexError):
-            return None
+    target = get_target(args, list_vms().split('\n'))
 
-    if args.interactive:
-        target = interactive_choice()
-    else:
-        target = args.target
     if not target:
         args.parser.print_help()
         sys.exit(1)
 
-    command = [V_BOX_MANAGE, 'startvm', target, '--type']
     if args.with_gui:
-        command.append('gui')
+        start_type = 'gui'
     else:
-        command.append('headless')
-    completed = subprocess.run(command)
-    sys.exit(completed.returncode)
+        start_type = 'headless'
+
+    command = [V_BOX_MANAGE, 'startvm', target, '--type', start_type]
+    run_with_exit_code(command)
+
+
+def do_poweroff(args):
+    target = get_target(args, list_running_vms().split('\n'))
+
+    if not target:
+        args.parser.print_help()
+        sys.exit(1)
+
+    if args.force:
+        subcommand = 'poweroff'
+    else:
+        subcommand = 'acpipowerbutton'
+
+    command = [V_BOX_MANAGE, 'controlvm', target, subcommand]
+    run_with_exit_code(command)
 
 
 def main():
@@ -63,6 +98,12 @@ def main():
     parser_start.add_argument('-g', '--with-gui', action='store_true')
     parser_start.add_argument('-i', '--interactive', action='store_true')
     parser_start.set_defaults(func=do_start, parser=parser_start)
+
+    parser_poweroff = subparsers.add_parser(POWEROFF)
+    parser_poweroff.add_argument('target', nargs='?')
+    parser_poweroff.add_argument('-f', '--force', action='store_true')
+    parser_poweroff.add_argument('-i', '--interactive', action='store_true')
+    parser_poweroff.set_defaults(func=do_poweroff, parser=parser_poweroff)
 
     args = parser.parse_args()
     args.func(args)
