@@ -5,7 +5,7 @@ import subprocess
 import re
 import sys
 
-LIST, LIST_VMS, START, POWEROFF = ('list', 'list-vms', 'start', 'poweroff')
+LIST, LIST_VMS, START, POWEROFF, LOGIN = ('list', 'list-vms', 'start', 'poweroff', 'login')
 V_BOX_MANAGE = 'VBoxManage'
 
 
@@ -102,6 +102,11 @@ def do_poweroff(args):
     run_with_exit_code(command)
 
 
+def do_login(args):
+    command = ['ssh', args.target]
+    run_with_exit_code(command)
+
+
 def main():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest='command')
@@ -124,6 +129,10 @@ def main():
     parser_poweroff.add_argument('-f', '--force', action='store_true')
     parser_poweroff.add_argument('-i', '--interactive', action='store_true')
     parser_poweroff.set_defaults(func=do_poweroff, parser=parser_poweroff)
+
+    parser_login = subparsers.add_parser(LOGIN)
+    parser_login.add_argument('target')
+    parser_login.set_defaults(func=do_login, parser=parser_login)
 
     args = parser.parse_args()
     args.func(args)
