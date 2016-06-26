@@ -2,35 +2,68 @@
 
 import argparse
 import subprocess
+import re
+import sys
 
 LIST, START = ('list', 'start')
 V_BOX_MANAGE = 'VBoxManage'
 
 
+def list_vms():
+    completed = subprocess.run([V_BOX_MANAGE, 'list', 'vms'], stdout=subprocess.PIPE)
+    return completed.stdout.decode().strip()
+
+
 def do_list(_):
-    result = subprocess.run([V_BOX_MANAGE, 'list', 'vms'], stdout=subprocess.PIPE)
-    print(result.stdout.decode().strip())
+    print(list_vms())
 
 
 def do_start(args):
-    command = [V_BOX_MANAGE, 'startvm', args.target, '--type']
+    def interactive_choice():
+        pattern = re.compile(
+            r'"(?P<name>[a-zA-Z0-9 ]+)" '
+            r'{(?P<uuid>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})}')
+        vms = map(lambda x: re.match(pattern, x), list_vms().split('\n'))
+        uuids = []
+        for index, value in enumerate(vms):
+            uuids.append(value.group('uuid'))
+            print('{}: {}'.format(index, value.group('name')))
+        try:
+            return uuids[int(input('>>> ').strip())]
+        except (EOFError, ValueError, IndexError):
+            return None
+
+    if args.interactive:
+        target = interactive_choice()
+    else:
+        target = args.target
+    if not target:
+        args.parser.print_help()
+        sys.exit(1)
+
+    command = [V_BOX_MANAGE, 'startvm', target, '--type']
     if args.with_gui:
         command.append('gui')
     else:
         command.append('headless')
-    subprocess.run(command)
+    completed = subprocess.run(command)
+    sys.exit(completed.returncode)
 
 
 def main():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest='command')
     subparsers.required = True
+
     parser_list = subparsers.add_parser(LIST)
-    parser_list.set_defaults(func=do_list)
+    parser_list.set_defaults(func=do_list, parser=parser_list)
+
     parser_start = subparsers.add_parser(START)
-    parser_start.add_argument('target')
+    parser_start.add_argument('target', nargs='?')
     parser_start.add_argument('-g', '--with-gui', action='store_true')
-    parser_start.set_defaults(func=do_start)
+    parser_start.add_argument('-i', '--interactive', action='store_true')
+    parser_start.set_defaults(func=do_start, parser=parser_start)
+
     args = parser.parse_args()
     args.func(args)
 
