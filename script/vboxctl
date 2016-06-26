@@ -5,8 +5,8 @@ import subprocess
 import re
 import sys
 
-LIST, LIST_VMS, START, POWEROFF, LOGIN, CLONE, REMOVE = (
-    'list', 'list-vms', 'start', 'poweroff', 'login', 'clone', 'remove')
+LIST, LIST_VMS, START, POWEROFF, LOGIN, CLONE, REMOVE, SNAPSHOT, TAKE, RESTORE = (
+    'list', 'list-vms', 'start', 'poweroff', 'login', 'clone', 'remove', 'snapshot', 'take', 'restore')
 V_BOX_MANAGE = 'VBoxManage'
 
 
@@ -118,41 +118,99 @@ def do_remove(args):
     run_with_exit_code(command)
 
 
+def do_snapshot(args):
+    def _list(args):
+        command = [V_BOX_MANAGE, SNAPSHOT, args.target, LIST]
+        run_with_exit_code(command)
+
+    def _take(args):
+        command = [V_BOX_MANAGE, SNAPSHOT, args.target, TAKE, args.name]
+        run_with_exit_code(command)
+
+    def _restore(args):
+        command = [V_BOX_MANAGE, SNAPSHOT, args.target, RESTORE, args.name]
+        run_with_exit_code(command)
+
+    def _remove(args):
+        command = [V_BOX_MANAGE, SNAPSHOT, args.target, 'delete', args.name]
+        run_with_exit_code(command)
+
+    subcommand = args.subcommand
+    if subcommand == LIST:
+        _list(args)
+    elif subcommand == TAKE:
+        _take(args)
+    elif subcommand == RESTORE:
+        _restore(args)
+    elif subcommand == REMOVE:
+        _remove(args)
+
+
 def main():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest='command')
     subparsers.required = True
 
-    parser_list = subparsers.add_parser(LIST)
-    parser_list.set_defaults(func=do_list, parser=parser_list)
+    def setup_list_parser(subparsers):
+        parser_list = subparsers.add_parser(LIST)
+        parser_list.set_defaults(func=do_list, parser=parser_list)
 
-    parser_list_vms = subparsers.add_parser(LIST_VMS)
-    parser_list_vms.set_defaults(func=do_list_vms, parser=parser_list_vms)
+    def setup_list_vms_parser(subparsers):
+        parser_list_vms = subparsers.add_parser(LIST_VMS)
+        parser_list_vms.set_defaults(func=do_list_vms, parser=parser_list_vms)
 
-    parser_start = subparsers.add_parser(START)
-    parser_start.add_argument('target', nargs='?')
-    parser_start.add_argument('-g', '--with-gui', action='store_true')
-    parser_start.add_argument('-i', '--interactive', action='store_true')
-    parser_start.set_defaults(func=do_start, parser=parser_start)
+    def setup_start_parser(subparsers):
+        parser_start = subparsers.add_parser(START)
+        parser_start.add_argument('target', nargs='?')
+        parser_start.add_argument('-g', '--with-gui', action='store_true')
+        parser_start.add_argument('-i', '--interactive', action='store_true')
+        parser_start.set_defaults(func=do_start, parser=parser_start)
 
-    parser_poweroff = subparsers.add_parser(POWEROFF)
-    parser_poweroff.add_argument('target', nargs='?')
-    parser_poweroff.add_argument('-f', '--force', action='store_true')
-    parser_poweroff.add_argument('-i', '--interactive', action='store_true')
-    parser_poweroff.set_defaults(func=do_poweroff, parser=parser_poweroff)
+    def setup_poweroff_parser(subparsers):
+        parser_poweroff = subparsers.add_parser(POWEROFF)
+        parser_poweroff.add_argument('target', nargs='?')
+        parser_poweroff.add_argument('-f', '--force', action='store_true')
+        parser_poweroff.add_argument('-i', '--interactive', action='store_true')
+        parser_poweroff.set_defaults(func=do_poweroff, parser=parser_poweroff)
 
-    parser_login = subparsers.add_parser(LOGIN)
-    parser_login.add_argument('target')
-    parser_login.set_defaults(func=do_login, parser=parser_login)
+    def setup_login_parser(subparsers):
+        parser_login = subparsers.add_parser(LOGIN)
+        parser_login.add_argument('target')
+        parser_login.set_defaults(func=do_login, parser=parser_login)
 
-    parser_clone = subparsers.add_parser(CLONE)
-    parser_clone.add_argument('target')
-    parser_clone.add_argument('name')
-    parser_clone.set_defaults(func=do_clone, parser=parser_clone)
+    def setup_clone_parser(subparsers):
+        parser_clone = subparsers.add_parser(CLONE)
+        parser_clone.add_argument('target')
+        parser_clone.add_argument('name')
+        parser_clone.set_defaults(func=do_clone, parser=parser_clone)
 
-    parser_remove = subparsers.add_parser(REMOVE)
-    parser_remove.add_argument('target')
-    parser_remove.set_defaults(func=do_remove, parser=parser_remove)
+    def setup_remove_parser(subparsers):
+        parser_remove = subparsers.add_parser(REMOVE)
+        parser_remove.add_argument('target')
+        parser_remove.set_defaults(func=do_remove, parser=parser_remove)
+
+    def setup_snapshot_parser(subparsers):
+        parser_snapshot = subparsers.add_parser(SNAPSHOT)
+        parser_snapshot.add_argument('target')
+        parser_snapshot.set_defaults(func=do_snapshot, parser=parser_snapshot)
+        third_parsers = parser_snapshot.add_subparsers(dest='subcommand')
+        third_parsers.required = True
+        third_parsers.add_parser(LIST)
+        parser_take = third_parsers.add_parser(TAKE)
+        parser_take.add_argument('name')
+        parser_restore = third_parsers.add_parser(RESTORE)
+        parser_restore.add_argument('name')
+        parser_remove = third_parsers.add_parser(REMOVE)
+        parser_remove.add_argument('name')
+
+    setup_list_parser(subparsers)
+    setup_list_vms_parser(subparsers)
+    setup_start_parser(subparsers)
+    setup_poweroff_parser(subparsers)
+    setup_login_parser(subparsers)
+    setup_clone_parser(subparsers)
+    setup_remove_parser(subparsers)
+    setup_snapshot_parser(subparsers)
 
     args = parser.parse_args()
     args.func(args)
