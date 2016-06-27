@@ -41,7 +41,10 @@ def do_list_common(args, list_func):
     vms = list_func()
     if not vms:
         sys.exit(0)
-    vm_names = map(parse_v_box_manage_list_output, vms.split('\n'))
+    try:
+        vm_names = map(parse_v_box_manage_list_output, vms.split('\n'))
+    except ValueError:
+        sys.exit(1)
     if args.name:
         for n in vm_names:
             print(n.name)
