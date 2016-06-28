@@ -6,6 +6,39 @@ import os
 import random
 import string
 
+START = ('start',)
+IMAGE_NAME = 'colajam93/archlinux'
+
+
+def do_start(args):
+    pass
+
+
+def setup_start_parser(parser):
+    parser_start = parser.add_parser(START)
+    parser_start.add_argument('target')
+    parser_start.add_argument('-r', '--remove', action='store_true')
+    parser_start.add_argument('-m', '--mount-home', action='store_true')
+    parser_start.add_argument('-g', '--with-gui', action='store_true')
+    parser_start.add_argument('-i', '--image')
+    parser_start.add_argument('-p', '--port')
+    parser_start.add_argument('-n', '--name')
+    parser_start.add_argument('-v', '--volume')
+    parser_start.set_defaults(func=do_start, parser=parser_start)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(dest='command')
+    subparsers.required = True
+    setup_start_parser(subparsers)
+    args = parser.parse_args()
+    args.func(args)
+
+
+if __name__ == '__main__':
+    main()
+
 parser = argparse.ArgumentParser(description='control test docker container')
 parser.add_argument('command', help='accepted command [run, list, attach, rm]')
 parser.add_argument('-r', '--rm', action='store_true',
@@ -14,7 +47,7 @@ parser.add_argument('-m', '--mount-home', action='store_true',
                     help='mount home directory to /mnt')
 parser.add_argument('-x', '--mount-x-socket', action='store_true',
                     help='mount X11 socket, set DISPLAY environment variable and run \'xhost +\'.'
-                    'When the container exited, run \'xhost -\'')
+                         'When the container exited, run \'xhost -\'')
 parser.add_argument('-i', '--image', action='store', type=str,
                     help='image name')
 parser.add_argument('-p', '--port', action='store', type=str,
@@ -25,16 +58,15 @@ parser.add_argument('-v', '--directory-mount', action='store', type=str,
                     help='mount directory (full path) with docker syntax')
 args = parser.parse_args()
 
-
 if args.command == 'run':
     optional_args = []
     if args.rm:
         optional_args.append('--rm')
     if args.mount_home:
-        optional_args.extend(['-v', os.environ['HOME']+':/mnt'])
+        optional_args.extend(['-v', os.environ['HOME'] + ':/mnt'])
     if args.mount_x_socket:
         optional_args.extend(['-v', '/tmp/.X11-unix:/tmp/.X11-unix', '-e',
-                              'DISPLAY='+os.environ['DISPLAY']])
+                              'DISPLAY=' + os.environ['DISPLAY']])
         subprocess.call(['xhost', '+'])
     if args.port:
         optional_args.extend(['-p', args.port])
@@ -48,16 +80,16 @@ if args.command == 'run':
         container_suffix = args.name
     else:
         container_suffix = ''.join(random.choice(
-                                   string.ascii_letters+string.digits) for _ in range(10))
+            string.ascii_letters + string.digits) for _ in range(10))
 
     if args.directory_mount:
         optional_args.extend(['-v', args.directory_mount])
 
-    container_name = 'testenv_'+container_suffix
+    container_name = 'testenv_' + container_suffix
     command_left = ['docker', 'run', '-it']
     command_right = ['--name', container_name, image_name, '/bin/bash']
 
-    subprocess.call(command_left+optional_args+command_right)
+    subprocess.call(command_left + optional_args + command_right)
     if args.mount_x_socket:
         subprocess.call(['xhost', '-'])
 
@@ -105,7 +137,7 @@ elif args.command == 'rm':
             quit(1)
     if len(rml) == 0:
         quit(1)
-    subprocess.call(['docker', 'rm']+rml)
+    subprocess.call(['docker', 'rm'] + rml)
 
 
 elif args.command == 'attach':
