@@ -125,80 +125,92 @@ def main():
     subparsers.required = True
 
     def setup_list_parser(subparsers):
-        parser_list = subparsers.add_parser(LIST)
+        desc = 'show running vm list'
+        parser_list = subparsers.add_parser(LIST, description=desc, help=desc)
         group = parser_list.add_mutually_exclusive_group()
-        group.add_argument('-n', '--name', action='store_true')
-        group.add_argument('-u', '--uuid', action='store_true')
+        group.add_argument('-n', '--name', action='store_true', help='show name only')
+        group.add_argument('-u', '--uuid', action='store_true', help='show uuid only')
         parser_list.set_defaults(func=do_list)
 
     setup_list_parser(subparsers)
 
     def setup_list_vms_parser(subparsers):
-        parser_list_vms = subparsers.add_parser(LIST_VMS)
+        desc = 'show vm list'
+        parser_list_vms = subparsers.add_parser(LIST_VMS, description=desc, help=desc)
         group = parser_list_vms.add_mutually_exclusive_group()
-        group.add_argument('-n', '--name', action='store_true')
-        group.add_argument('-u', '--uuid', action='store_true')
+        group.add_argument('-n', '--name', action='store_true', help='show name only')
+        group.add_argument('-u', '--uuid', action='store_true', help='show uuid only')
         parser_list_vms.set_defaults(func=do_list_vms)
 
     setup_list_vms_parser(subparsers)
 
     def setup_start_parser(subparsers):
-        parser_start = subparsers.add_parser(START)
-        parser_start.add_argument('target')
-        parser_start.add_argument('-g', '--with-gui', action='store_true')
+        desc = 'start vm'
+        parser_start = subparsers.add_parser(START, description=desc, help=desc)
+        parser_start.add_argument('target', help='vm name')
+        parser_start.add_argument('-g', '--with-gui', action='store_true', help='start with gui window')
         parser_start.set_defaults(func=do_start)
 
     setup_start_parser(subparsers)
 
     def setup_poweroff_parser(subparsers):
-        parser_poweroff = subparsers.add_parser(POWEROFF)
-        parser_poweroff.add_argument('target')
-        parser_poweroff.add_argument('-f', '--force', action='store_true')
+        desc = 'poweroff vm'
+        parser_poweroff = subparsers.add_parser(POWEROFF, description=desc, help=desc)
+        parser_poweroff.add_argument('target', help='vm name')
+        parser_poweroff.add_argument('-f', '--force', action='store_true',
+                                     help="use 'poweroff' instead of 'acpipowerbutton'")
         parser_poweroff.set_defaults(func=do_poweroff)
 
     setup_poweroff_parser(subparsers)
 
     def setup_login_parser(subparsers):
-        parser_login = subparsers.add_parser(LOGIN)
-        parser_login.add_argument('target')
+        parser_login = subparsers.add_parser(LOGIN, description="execute 'ssh target'", help='login vm')
+        parser_login.add_argument('target', help='vm name')
         parser_login.set_defaults(func=do_login)
 
     setup_login_parser(subparsers)
 
     def setup_clone_parser(subparsers):
-        parser_clone = subparsers.add_parser(CLONE)
-        parser_clone.add_argument('target')
-        parser_clone.add_argument('name')
+        desc = 'clone vm'
+        parser_clone = subparsers.add_parser(CLONE, description=desc, help=desc)
+        parser_clone.add_argument('target', help='source vm name')
+        parser_clone.add_argument('name', help='destination vm mane')
         parser_clone.set_defaults(func=do_clone)
 
     setup_clone_parser(subparsers)
 
     def setup_remove_parser(subparsers):
-        parser_remove = subparsers.add_parser(REMOVE)
-        parser_remove.add_argument('target')
+        desc = 'remove vm'
+        parser_remove = subparsers.add_parser(REMOVE, description=desc, help=desc)
+        parser_remove.add_argument('target', help='vm name')
         parser_remove.set_defaults(func=do_remove)
 
     setup_remove_parser(subparsers)
 
     def setup_snapshot_parser(subparsers):
-        parser_snapshot = subparsers.add_parser(SNAPSHOT)
-        parser_snapshot.add_argument('target')
+        desc = 'snapshot operation'
+        parser_snapshot = subparsers.add_parser(SNAPSHOT, description=desc, help=desc)
+        parser_snapshot.add_argument('target', help='vm name')
         third_parsers = parser_snapshot.add_subparsers(dest='subcommand')
         third_parsers.required = True
 
-        parser_list = third_parsers.add_parser(LIST)
+        list_help = 'list snapshot'
+        parser_list = third_parsers.add_parser(LIST, description=list_help, help=list_help)
         parser_list.set_defaults(func=do_snapshot_list)
 
-        parser_take = third_parsers.add_parser(TAKE)
-        parser_take.add_argument('name')
+        take_help = 'take snapshot'
+        parser_take = third_parsers.add_parser(TAKE, description=take_help, help=take_help)
+        parser_take.add_argument('name', help='snapshot name')
         parser_take.set_defaults(func=do_snapshot_take)
 
-        parser_restore = third_parsers.add_parser(RESTORE)
-        parser_restore.add_argument('name')
+        restore_help = 'restore snapshot'
+        parser_restore = third_parsers.add_parser(RESTORE, description=restore_help, help=restore_help)
+        parser_restore.add_argument('name', help='snapshot name')
         parser_restore.set_defaults(func=do_snapshot_restore)
 
-        parser_remove = third_parsers.add_parser(REMOVE)
-        parser_remove.add_argument('name')
+        remove_help = 'remove snapshot'
+        parser_remove = third_parsers.add_parser(REMOVE, description=remove_help, help=remove_help)
+        parser_remove.add_argument('name', help='snapshot name')
         parser_remove.set_defaults(func=do_snapshot_remove)
 
     setup_snapshot_parser(subparsers)
