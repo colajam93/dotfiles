@@ -146,7 +146,7 @@ def main():
         parser_start = subparsers.add_parser(START)
         parser_start.add_argument('target')
         parser_start.add_argument('-g', '--with-gui', action='store_true')
-        parser_start.set_defaults(func=do_start, parser=parser_start)
+        parser_start.set_defaults(func=do_start)
 
     setup_start_parser(subparsers)
 
@@ -154,7 +154,7 @@ def main():
         parser_poweroff = subparsers.add_parser(POWEROFF)
         parser_poweroff.add_argument('target')
         parser_poweroff.add_argument('-f', '--force', action='store_true')
-        parser_poweroff.set_defaults(func=do_poweroff, parser=parser_poweroff)
+        parser_poweroff.set_defaults(func=do_poweroff)
 
     setup_poweroff_parser(subparsers)
 
