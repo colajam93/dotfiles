@@ -31,7 +31,7 @@ status.register("battery",
                 })
 
 # netctl-auto profile
-command = r'r=$(netctl-auto current); [[ $r == "" ]] ' \
+command = r'r=$(netctl-auto list | grep "*" | cut -d " " -f 2); [[ $r == "" ]] ' \
           r'&& echo "<span></span>" ' \
           r'|| echo "<span color=\"#00FF00\">@$r</span>"'
 status.register('shell',
