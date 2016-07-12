@@ -5,7 +5,7 @@ import argparse
 import os
 import sys
 
-START, DOCKER, RUN = ('start', 'docker', 'run')
+DOCKER, RUN = ('docker', 'run')
 IMAGE_NAME = 'colajam93/archlinux'
 
 
@@ -40,7 +40,7 @@ def do_start(args):
 
 def main():
     def setup_start_parser(parser):
-        parser_start = parser.add_parser(START)
+        parser_start = parser.add_parser(RUN)
         parser_start.add_argument('-r', '--remove', action='store_true')
         parser_start.add_argument('-m', '--mount-home', action='store_true')
         parser_start.add_argument('-g', '--with-gui', action='store_true')
