@@ -16,23 +16,21 @@ def run_with_exit_code(command):
 
 def do_start(args):
     options = ['-it']
+    read_only = ':ro' if not args.mount_writable else ''
     if args.remove:
         options.extend(['--rm'])
     if args.mount_home:
-        options.extend(['-v', '{}:/mnt'.format(os.environ['HOME'])])
+        options.extend(['-v', '{}:/mnt{}'.format(os.environ['HOME'], read_only)])
     if args.with_gui:
         options.extend(['-v', '/tmp/.X11-unix:/tmp/.X11-unix', '-e',
                         'DISPLAY={}'.format(os.environ['DISPLAY'])])
     if args.volume:
-        options.extend(['-v', args.volume])
+        options.extend(['-v', '{}{}'.format(args.volume, read_only)])
     if args.port:
         options.extend(['-p', args.port])
     if args.name:
         options.extend(['--name', args.name])
-    if args.image:
-        image = args.image
-    else:
-        image = IMAGE_NAME
+    image = args.image if args.image else IMAGE_NAME
 
     command = [DOCKER, RUN] + options + [image, '/bin/bash']
     run_with_exit_code(command)
@@ -43,6 +41,7 @@ def main():
         parser_start = parser.add_parser(RUN)
         parser_start.add_argument('-r', '--remove', action='store_true')
         parser_start.add_argument('-m', '--mount-home', action='store_true')
+        parser_start.add_argument('-w', '--mount-writable', action='store_true')
         parser_start.add_argument('-g', '--with-gui', action='store_true')
         parser_start.add_argument('-i', '--image')
         parser_start.add_argument('-p', '--port')
