@@ -3,31 +3,53 @@
 import subprocess
 import argparse
 import os
-import random
-import string
+import sys
 
-START = ('start',)
+START, DOCKER, RUN = ('start', 'docker', 'run')
 IMAGE_NAME = 'colajam93/archlinux'
 
 
+def run_with_exit_code(command):
+    completed = subprocess.run(command)
+    sys.exit(completed.returncode)
+
+
 def do_start(args):
-    pass
+    options = ['-it']
+    if args.remove:
+        options.extend(['--rm'])
+    if args.mount_home:
+        options.extend(['-v', '{}:/mnt'.format(os.environ['HOME'])])
+    if args.with_gui:
+        options.extend(['-v', '/tmp/.X11-unix:/tmp/.X11-unix', '-e',
+                        'DISPLAY={}'.format(os.environ['DISPLAY'])])
+    if args.volume:
+        options.extend(['-v', args.volume])
+    if args.port:
+        options.extend(['-p', args.port])
+    if args.name:
+        options.extend(['--name', args.name])
+    if args.image:
+        image = args.image
+    else:
+        image = IMAGE_NAME
 
-
-def setup_start_parser(parser):
-    parser_start = parser.add_parser(START)
-    parser_start.add_argument('target')
-    parser_start.add_argument('-r', '--remove', action='store_true')
-    parser_start.add_argument('-m', '--mount-home', action='store_true')
-    parser_start.add_argument('-g', '--with-gui', action='store_true')
-    parser_start.add_argument('-i', '--image')
-    parser_start.add_argument('-p', '--port')
-    parser_start.add_argument('-n', '--name')
-    parser_start.add_argument('-v', '--volume')
-    parser_start.set_defaults(func=do_start, parser=parser_start)
+    command = [DOCKER, RUN] + options + [image, '/bin/bash']
+    run_with_exit_code(command)
 
 
 def main():
+    def setup_start_parser(parser):
+        parser_start = parser.add_parser(START)
+        parser_start.add_argument('-r', '--remove', action='store_true')
+        parser_start.add_argument('-m', '--mount-home', action='store_true')
+        parser_start.add_argument('-g', '--with-gui', action='store_true')
+        parser_start.add_argument('-i', '--image')
+        parser_start.add_argument('-p', '--port')
+        parser_start.add_argument('-n', '--name')
+        parser_start.add_argument('-v', '--volume')
+        parser_start.set_defaults(func=do_start, parser=parser_start)
+
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest='command')
     subparsers.required = True
@@ -38,160 +60,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-parser = argparse.ArgumentParser(description='control test docker container')
-parser.add_argument('command', help='accepted command [run, list, attach, rm]')
-parser.add_argument('-r', '--rm', action='store_true',
-                    help='remove test container when the container exited')
-parser.add_argument('-m', '--mount-home', action='store_true',
-                    help='mount home directory to /mnt')
-parser.add_argument('-x', '--mount-x-socket', action='store_true',
-                    help='mount X11 socket, set DISPLAY environment variable and run \'xhost +\'.'
-                         'When the container exited, run \'xhost -\'')
-parser.add_argument('-i', '--image', action='store', type=str,
-                    help='image name')
-parser.add_argument('-p', '--port', action='store', type=str,
-                    help='publish port')
-parser.add_argument('-n', '--name', action='store', type=str,
-                    help='container name(suffix)')
-parser.add_argument('-v', '--directory-mount', action='store', type=str,
-                    help='mount directory (full path) with docker syntax')
-args = parser.parse_args()
-
-if args.command == 'run':
-    optional_args = []
-    if args.rm:
-        optional_args.append('--rm')
-    if args.mount_home:
-        optional_args.extend(['-v', os.environ['HOME'] + ':/mnt'])
-    if args.mount_x_socket:
-        optional_args.extend(['-v', '/tmp/.X11-unix:/tmp/.X11-unix', '-e',
-                              'DISPLAY=' + os.environ['DISPLAY']])
-        subprocess.call(['xhost', '+'])
-    if args.port:
-        optional_args.extend(['-p', args.port])
-
-    if args.image:
-        image_name = args.image
-    else:
-        image_name = 'colajam93/archlinux'
-
-    if args.name:
-        container_suffix = args.name
-    else:
-        container_suffix = ''.join(random.choice(
-            string.ascii_letters + string.digits) for _ in range(10))
-
-    if args.directory_mount:
-        optional_args.extend(['-v', args.directory_mount])
-
-    container_name = 'testenv_' + container_suffix
-    command_left = ['docker', 'run', '-it']
-    command_right = ['--name', container_name, image_name, '/bin/bash']
-
-    subprocess.call(command_left + optional_args + command_right)
-    if args.mount_x_socket:
-        subprocess.call(['xhost', '-'])
-
-
-elif args.command == 'rm':
-    psa = subprocess.check_output(['docker', 'ps', '-a']).decode().strip()
-    psa = psa.split('\n')[1:]
-    tec = []
-    for i in psa:
-        if 'testenv_' in i:
-            tec.append(i)
-    if len(tec) == 0:
-        print('no test container')
-        quit(1)
-    for i in range(len(tec)):
-        print('{}: {}'.format(i, tec[i]))
-    print('enter n of containers to be removed (ex: 1 2 3 or all)')
-    try:
-        target = input('>>> ').strip()
-    except EOFError:
-        quit(1)
-    else:
-        if target == '':
-            quit(1)
-    target = target.split(' ')
-    rml = []
-    if 'all' in target or 'a' in target:
-        for i in tec:
-            if 'Up' in i.split():
-                print('skipped up container {}'.format(i.split()[0]))
-                continue
-            rml.append(i.split()[0])
-    else:
-        try:
-            for i in map(int, target):
-                if 'Up' in tec[i].split():
-                    print('skipped up container {}'.format(tec[i].split()[0]))
-                    continue
-                rml.append(tec[i].split()[0])
-        except IndexError:
-            print('index error')
-            quit(1)
-        except ValueError:
-            print('value error')
-            quit(1)
-    if len(rml) == 0:
-        quit(1)
-    subprocess.call(['docker', 'rm'] + rml)
-
-
-elif args.command == 'attach':
-    psa = subprocess.check_output(['docker', 'ps', '-a']).decode().strip()
-    psa = psa.split('\n')[1:]
-    tec = []
-    for i in psa:
-        if 'testenv_' in i:
-            tec.append(i)
-    if len(tec) == 0:
-        print('no test container')
-        quit(1)
-    for i in range(len(tec)):
-        print('{}: {}'.format(i, tec[i]))
-    print('enter n of containers to be attached')
-    try:
-        target = input('>>> ').strip()
-    except EOFError:
-        quit(1)
-    else:
-        if target == '':
-            quit(1)
-    target = target.split(' ')
-    if len(target) != 1:
-        print('only one container can be attached')
-        quit(1)
-    else:
-        try:
-            target = int(target[0])
-            cid = tec[target].split()[0]
-        except IndexError:
-            print('index error')
-            quit(1)
-        except ValueError:
-            print('value error')
-            quit(1)
-    if 'Exited' in tec[target]:
-        subprocess.call(['docker', 'start', cid])
-    subprocess.call(['docker', 'attach', cid])
-
-
-elif args.command == "list":
-    psa = subprocess.check_output(['docker', 'ps', '-a']).decode().strip()
-    psa = psa.split('\n')[1:]
-    tec = []
-    for i in psa:
-        if 'testenv_' in i:
-            tec.append(i)
-    if len(tec) == 0:
-        print('no test container')
-        quit(1)
-    for i in range(len(tec)):
-        print('{}: {}'.format(i, tec[i]))
-
-
-else:
-    print("invalid command")
