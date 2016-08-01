@@ -21,3 +21,6 @@ repo = 'shiracamus/vim-syntax-x86-objdump-d'
 
 [[plugins]]
 repo = 'cespare/vim-toml'
+
+[[plugins]]
+repo = 'derekwyatt/vim-scala'
