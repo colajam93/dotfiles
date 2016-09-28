@@ -4,6 +4,7 @@ repo = 'Shougo/dein.vim'
 [[plugins]]
 repo = 'Yggdroot/indentLine'
 hook_add = '''
+    let g:indentLine_setConceal = 0
     let g:indentLine_color_term = 63
     let g:indent_guides_start_level = 2
 '''
