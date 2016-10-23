@@ -1,9 +1,4 @@
 # function
-_sc_pyenv_exec() {
-    source $HOME/.virtualenvs/default/bin/activate
-    $@
-    deactivate
-}
 
 man() {
     env LESS_TERMCAP_mb=$'\E[01;31m' \
@@ -45,15 +40,6 @@ login-all-machine() {
 }
 
 # alias
-# pyenv
-_sc_pyenv_alias() {
-    alias "$1=_sc_pyenv_exec $1"
-}
-
-_sc_pyenv_alias yapf
-
-unset -f _sc_pyenv_alias
-
 # rlwrap
 _sc_rlwrap_alias() {
     alias "$1=rlwrap $1"
