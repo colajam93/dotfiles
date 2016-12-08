@@ -12,9 +12,8 @@ hook_add = '''
 [[plugins]]
 repo = 'cocopon/iceberg.vim'
 hook_add = '''
-    hi Visual ctermbg=231
-    hi MatchParen ctermbg=darkblue
     colorscheme iceberg
+    hi MatchParen ctermbg=darkblue
 '''
 
 [[plugins]]
