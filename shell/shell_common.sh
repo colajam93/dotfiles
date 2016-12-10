@@ -19,7 +19,7 @@ certinfo() {
     echo | openssl s_client -showcerts -servername $1 -connect $1:443 2>/dev/null | openssl x509 -noout -text
 }
 
-docker-cleanup() {
+docker_cleanup() {
     processes=$(docker ps -q -f status=exited)
     if [ -n "$processes" ]; then
       docker rm $processes
@@ -58,8 +58,8 @@ alias tmux='tmux -2'
 # environment variable
 export EDITOR=vim
 export SYSTEMD_EDITOR=$EDITOR
-export GOPATH=$HOME/local/go
-export PATH=$HOME/.local/bin:$PATH:$COCOS:$GOPATH/bin
+export GOPATH="$HOME/local/go"
+export PATH="$PATH:$GOPATH/bin:$HOME/.local/bin"
 
 vewl="virtualenvwrapper_lazy.sh"
 if type $vewl > /dev/null 2>&1; then
