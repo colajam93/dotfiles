@@ -31,14 +31,6 @@ docker-cleanup() {
     fi
 }
 
-login-all-machine() {
-    for i in $(machinectl | tail -n +2 | head -n -2 | cut -d ' ' -f 1); do
-        echo "Login to $i"
-        sudo machinectl login $i
-        sleep 1
-    done
-}
-
 # alias
 # rlwrap
 _sc_rlwrap_alias() {
@@ -66,7 +58,6 @@ alias tmux='tmux -2'
 # environment variable
 export EDITOR=vim
 export SYSTEMD_EDITOR=$EDITOR
-COCOS=$HOME/local/cocos2d-x/tools/cocos2d-console/bin
 export GOPATH=$HOME/local/go
 export PATH=$HOME/.local/bin:$PATH:$COCOS:$GOPATH/bin
 
