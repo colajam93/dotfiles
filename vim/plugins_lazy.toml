@@ -40,7 +40,7 @@ repo = 'kannokanno/previm'
 on_ft = ['markdown']
 hook_add = '''
     if has("unix")
-        let s:uname_s = system("uname -s")
+        let s:uname_s = substitute(system("uname -s"), '\n', '', '')
         if s:uname_s == "Darwin"
             let g:previm_open_cmd = 'open -a "Google Chrome"'
         elseif s:uname_s == "Linux"
