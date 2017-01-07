@@ -14,4 +14,4 @@ if ! lsvirtualenv -b | grep i3 > /dev/null 2>&1; then
 else
     workon i3
 fi
-pip install --upgrade i3pystatus netifaces pyalsaaudio colour dbus-python psutil
+pip install --upgrade -r "${script_dir}/requirements.txt"
