@@ -136,7 +136,7 @@ dotfile_install() {
 install_all() {
     local target_dir=$1
     shift
-    local excludes="$(join '|' $(_backward_match 'install.sh' $@))"
+    local excludes="$(join '|' $(_backward_match 'install.sh' '.*.swp' $@))"
     local i
     for i in $(find $target_dir -maxdepth 1 -type f | egrep -v $excludes); do
         dotfile_install "$(_gnu_readlink_f $i)" $HOME
