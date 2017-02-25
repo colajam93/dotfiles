@@ -1,8 +1,7 @@
 export GTK_IM_MODULE=fcitx
 export QT_IM_MODULE=fcitx
 export XMODIFIERS="@im=fcitx"
-export QT_STYLE_OVERRIDE=gtk
-export _JAVA_OPTIONS='-Dawt.useSystemAAFontSettings=on -Dswing.aatext=true'
+export QT_QPA_PLATFORMTHEME="qt5ct"
 
 xbindkeys
 fcitx
