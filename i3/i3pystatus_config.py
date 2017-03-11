@@ -30,6 +30,14 @@ status.register("battery",
                     "FULL": "=",
                 })
 
+# Displays VPN status
+status.register("openvpn",
+                format='{status}',
+                vpn_name="client",
+                status_command="bash -c 'systemctl show openvpn-client@%(vpn_name)s | grep ActiveState=active'",
+                status_up='VPN',
+                status_down='')
+
 # netctl-auto profile
 command = r'r=$(netctl-auto list | grep "*" | cut -d " " -f 2); [[ $r == "" ]] ' \
           r'&& echo "<span></span>" ' \
@@ -51,12 +59,6 @@ status.register('network',
                 format_up='ETHERNET:{v4cidr}',
                 format_down='',
                 interval=5)
-
-# Displays VPN status
-status.register("runwatch",
-                name="VPN",
-                path="/var/run/ppp*.pid",
-                format_down="")
 
 # Memory usage
 status.register('mem',
