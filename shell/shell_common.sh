@@ -68,3 +68,4 @@ fi
 
 # load environment specific file
 [[ -f ~/.shell_extra.sh ]] && . ~/.shell_extra.sh
+[[ -f ~/.shell_extra_$(hostname).sh ]] && . ~/.shell_extra_$(hostname).sh
