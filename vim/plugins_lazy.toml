@@ -6,7 +6,7 @@ hook_add = '''
     let g:syntastic_auto_loc_list = 0
     let g:syntastic_python_checkers = ['pyflakes', 'pep8']
     let g:syntastic_cpp_compiler = 'clang++'
-    let g:syntastic_cpp_compiler_options  = '-std=c++14 -Wall -Wextra -stdlib=libc++ -lc++abi'
+    let g:syntastic_cpp_compiler_options  = '-std=c++14 -Wall -Wextra'
     let g:syntastic_c_compiler = 'clang'
     let g:syntastic_c_compiler_options  = '-std=c11 -Wall'
     let g:syntastic_go_checkers = ['go', 'golint']
@@ -17,7 +17,7 @@ repo = 'justmao945/vim-clang'
 on_ft = ['cpp', 'c']
 hook_add = '''
     let g:clang_c_options = '-std=c11 -Wall'
-    let g:clang_cpp_options = '-std=c++14 -stdlib=libc++ -Wall'
+    let g:clang_cpp_options = '-std=c++14 -Wall'
 '''
 
 [[plugins]]
