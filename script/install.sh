@@ -5,5 +5,6 @@ source $script_dir/../lib/dotfiles.sh
 
 local_script_dir=$HOME/.local/bin
 install -d $local_script_dir
-safe_install $script_dir/vboxctl $local_script_dir 755
-safe_install $script_dir/testenvctl $local_script_dir 755
+foreach_with_generator \
+    "safe_install %s $local_script_dir 755" \
+    "ls_absolute_path $script_dir/../external/scripts/bin"
