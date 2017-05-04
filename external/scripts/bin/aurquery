@@ -19,22 +19,28 @@ def info_url(packages: List[str], server: str = OFFICIAL_AUR_URL) -> str:
     return server + '/rpc/?v=5&type=info&' + '&'.join(['arg[]={}'.format(quote(x)) for x in packages])
 
 
+def search_url(package: str, server: str = OFFICIAL_AUR_URL) -> str:
+    return server + '/rpc/?v=5&type=search&arg={}'.format(quote(package))
+
+
 def query(url: str):
     with closing(urlopen(url)) as request:
         return json.loads(request.read().decode())
 
 
-def do_export(query_dict, args) -> None:
-    if query_dict['resultcount'] == 0:
+def do_getpkgbuild(packages: List[str], directory: str) -> None:
+    query_result = query(info_url(packages))
+    if query_result['resultcount'] == 0:
         # TODO: Error message
         return
     with TemporaryDirectory() as temp_dir:
-        for package in query_dict['results']:
+        for package in query_result['results']:
             with NamedTemporaryFile(dir=temp_dir) as t:
                 with closing(urlopen(OFFICIAL_AUR_URL + package['URLPath'])) as request:
                     t.write(request.read())
                     t.flush()
-                subprocess.run(['tar', 'xvf', t.name, '-C', temp_dir], stderr=subprocess.DEVNULL)
+                subprocess.run(['tar', 'xvf', t.name, '-C', temp_dir],
+                               stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
 
         def listdir_only_directory(path: str) -> List[str]:
             def absolute_path(p: str) -> str:
@@ -42,32 +48,34 @@ def do_export(query_dict, args) -> None:
 
             return list(absolute_path(x) for x in os.listdir(path) if os.path.isdir(absolute_path(x)))
 
-        output_directory = os.getcwd() if not args.directory else args.directory
+        output_directory = directory if directory else os.getcwd()
         # TODO: Overwrite handling
         for d in listdir_only_directory(temp_dir):
             shutil.move(d, output_directory)
 
 
-def do_query(query_dict, args) -> None:
+def do_sync_search(packages: List[str]) -> None:
     # TODO: Pretty output
-    print(json.dumps(query_dict, indent=4))
+    # TODO: concurrent query
+    query_results = [query(search_url(package)) for package in packages]
+    for r in query_results:
+        print(json.dumps(r, indent=4))
 
 
 def main() -> None:
     parser = ArgumentParser()
-    parser.add_argument('package', nargs='+')
-    parser.add_argument('--directory', '-d')
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument('--query', '-Q', action='store_true')
+    group.add_argument('--sync', '-S', action='store_true')
     group.add_argument('--getpkgbuild', '-G', action='store_true')
+    parser.add_argument('package', nargs='+')
+    parser.add_argument('--directory', '-d', default='')
+    parser.add_argument('--search', '-s', action='store_true')
     args = parser.parse_args()
 
-    info_url_ = info_url(args.package)
-    query_result = query(info_url_)
-    if args.query:
-        do_query(query_result, args)
+    if args.sync and args.search:
+        do_sync_search(args.package)
     elif args.getpkgbuild:
-        do_export(query_result, args)
+        do_getpkgbuild(args.package, args.directory)
 
 
 if __name__ == '__main__':
