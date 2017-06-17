@@ -10,4 +10,4 @@ PS1='[\u@\h \W]\$ '
 complete -cf sudo
 complete -cf man
 
-source $HOME/.shell_common.sh
+source $HOME/.shell/common.sh

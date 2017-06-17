@@ -67,5 +67,5 @@ if type $vewl > /dev/null 2>&1; then
 fi
 
 # load environment specific file
-[[ -f ~/.shell_extra.sh ]] && . ~/.shell_extra.sh
-[[ -f ~/.shell_extra_$(hostname).sh ]] && . ~/.shell_extra_$(hostname).sh
+[[ -f ~/.shell/platform.sh ]] && . ~/.shell/platform.sh
+[[ -f ~/.shell/private.sh ]] && . ~/.shell/private.sh

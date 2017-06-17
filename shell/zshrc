@@ -84,4 +84,4 @@ if [[ ! -d $ZSH_CACHE_DIR ]]; then
 fi
 
 source $ZSH/oh-my-zsh.sh
-source $HOME/.shell_common.sh
+source $HOME/.shell/common.sh

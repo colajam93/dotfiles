@@ -168,3 +168,14 @@ ls_absolute_path() {
         echo $(_gnu_readlink_f $i)
     done
 }
+
+platform_name() {
+    local n=$(uname -s)
+    if [[ $n == "Linux" ]]; then
+        echo "linux"
+    elif [[ $n == "Darwin" ]]; then
+        echo "mac"
+    else
+        echo $n
+    fi
+}
