@@ -3,6 +3,11 @@
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $script_dir/../lib/dotfiles.sh
 
+if [[ $(platform_name) != "mac" ]]; then
+    print_error "platform is not MacOS"
+    exit 1
+fi
+
 if ! installed "brew"; then
     print_error "brew is not installed"
     exit 1
