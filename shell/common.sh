@@ -53,6 +53,7 @@ alias cp='cp -i'
 alias mv='mv -i'
 alias rm='rm -i'
 alias grep='grep --color=auto'
+alias diff='diff --color=auto'
 alias tmux='tmux -2'
 
 # environment variable

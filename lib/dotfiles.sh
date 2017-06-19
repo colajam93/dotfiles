@@ -112,13 +112,7 @@ safe_install() {
         if [[ "$_dotfiles_force" = true ]]; then
             _overwrite_file $destfile_new $destfile_old
         else
-            local diff_command
-            if type colordiff > /dev/null 2>&1; then
-                diff_command='colordiff'
-            else
-                diff_command='diff'
-            fi
-            eval "$diff_command -u $destfile_old $destfile_new"
+            diff -u --color=auto $destfile_old $destfile_new
             echo "overwrite $destfile_old by new file? [y/N]"
             local input
             read input
