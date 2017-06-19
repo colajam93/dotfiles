@@ -1,3 +1,4 @@
+_red=$(tput setaf 1 2> /dev/null)
 _yellow=$(tput setaf 3 2> /dev/null)
 _blue=$(tput setaf 4 2> /dev/null)
 _reset=$(tput sgr0 2> /dev/null)
@@ -41,16 +42,30 @@ join() {
     printf "%s" "${@/#/$d}"
 }
 
-print_warning() {
-    if [[ "$_dotfiles_quiet" = false ]]; then
-        echo "${_yellow}warning:${_reset} $1"
+_is_quiet() {
+    [[ "$_dotfiles_quiet" = true ]]
+    return $?
+}
+
+print_error() {
+    if _is_quiet; then
+        return 0
     fi
+    echo "${_red}error:${_reset} $1"
+}
+
+print_warning() {
+    if _is_quiet; then
+        return 0
+    fi
+    echo "${_yellow}warning:${_reset} $1"
 }
 
 print_information() {
-    if [[ "$_dotfiles_quiet" = false ]]; then
-        echo "${_blue}information:${_reset} $1"
+    if _is_quiet; then
+        return 0
     fi
+    echo "${_blue}information:${_reset} $1"
 }
 
 safe_install() {
