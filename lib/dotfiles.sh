@@ -4,7 +4,7 @@ _blue=$(tput setaf 4 2> /dev/null)
 _reset=$(tput sgr0 2> /dev/null)
 
 _gnu_readlink_f() {
-    pushd $(pwd -P) > /dev/null 2>&1
+    pushd $(pwd -P) &> /dev/null
     local TARGET_FILE=$1
     while [[ "$TARGET_FILE" != "" ]]; do
         cd $(dirname $TARGET_FILE)
@@ -13,7 +13,7 @@ _gnu_readlink_f() {
     done
 
     echo "$(pwd -P)/$FILENAME"
-    popd > /dev/null 2>&1
+    popd &> /dev/null
 }
 
 _overwrite_file() {
@@ -43,7 +43,7 @@ join() {
 }
 
 _is_quiet() {
-    [[ "$_dotfiles_quiet" = true ]]
+    [[ "$_dotfiles_quiet" == "true" ]]
     return $?
 }
 
@@ -108,15 +108,15 @@ safe_install() {
     install -m $permission $srcfile $destfile
     print_information "installed in ${destfile}"
 
-    if [[ $destfile_new != '' ]]; then
-        if [[ "$_dotfiles_force" = true ]]; then
+    if [[ $destfile_new != "" ]]; then
+        if [[ "$_dotfiles_force" == "true" ]]; then
             _overwrite_file $destfile_new $destfile_old
         else
             diff -u --color=auto $destfile_old $destfile_new
             echo "overwrite $destfile_old by new file? [y/N]"
             local input
             read input
-            if [[ $input == 'y' ]]; then
+            if [[ $input == "y" ]]; then
                 _overwrite_file $destfile_new $destfile_old
             fi
         fi
