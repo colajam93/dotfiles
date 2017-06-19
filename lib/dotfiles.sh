@@ -194,3 +194,8 @@ platform_name() {
         echo $n
     fi
 }
+
+installed() {
+    type $1 &> /dev/null
+    return $?
+}
