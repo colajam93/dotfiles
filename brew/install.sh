@@ -28,5 +28,6 @@ brew install \
     python3 \
     rlwrap \
     tig \
+    tmux \
     vim \
     zsh
