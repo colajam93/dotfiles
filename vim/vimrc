@@ -1,6 +1,6 @@
 set t_Co=256
 set number
-syntax on
+syntax enable
 set tabstop=4
 set expandtab
 set shiftwidth=4
@@ -53,7 +53,3 @@ if dein#check_install()
 endif
 filetype plugin indent on
 " }}}
-
-" yapf
-map <C-Y><C-F> :call yapf#YAPF()<cr>
-imap <C-Y><C-F> <c-o>:call yapf#YAPF()<cr>
