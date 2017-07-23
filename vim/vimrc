@@ -22,7 +22,11 @@ if &compatible
   set nocompatible
 endif
 
-let s:vim_dir = expand('~/.vim')
+if has('nvim')
+    let s:vim_dir = expand('~/.config/nvim')
+else
+    let s:vim_dir = expand('~/.vim')
+endif
 let s:dein_dir = s:vim_dir . '/dein'
 let s:dein_repo_dir = s:dein_dir . '/repos/github.com/Shougo/dein.vim'
 
