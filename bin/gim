@@ -317,15 +317,14 @@ def do_list(file: Optional[str]) -> None:
         print('user defined patterns: {}'.format(','.join(map(f, gi.user_defines))))
 
 
-def do_list_templates(templates: List[str], show_error: bool) -> None:
+def do_list_templates(templates: List[str]) -> None:
     available_templates = get_available_templates()
     if templates:
         available, not_available = partition(lambda x: x in available_templates, map(lambda x: x.lower(), templates))
         for t in available:
             print(t)
-        if show_error:
-            for t in not_available:
-                print_error(f'error: template {t} was not found', file=sys.stderr)
+        for t in not_available:
+            print_error(f'error: template {t} was not found', file=sys.stderr)
     else:
         for t in available_templates:
             print(t)
@@ -468,8 +467,7 @@ def main() -> None:
         def setup_list_templates_parser(ps) -> None:
             p = ps.add_parser(C.LIST_TEMPLATES, help='print list of available templates in gitignore.io')
             p.add_argument('templates', nargs='*')
-            p.add_argument('-e', '--show-error', action='store_true')
-            p.set_defaults(func=lambda a: do_list_templates(a.templates, a.show_error))
+            p.set_defaults(func=lambda a: do_list_templates(a.templates))
 
         def setup_get_parser(ps) -> None:
             p = ps.add_parser(C.GET, help='download and print templates from gitignore.io')
