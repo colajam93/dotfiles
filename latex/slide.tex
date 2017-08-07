@@ -1,0 +1,76 @@
+\documentclass[dvipdfmx,aspectratio=169,t,14pt]{beamer}
+% ゴシック体を多ウェィト化
+\usepackage[deluxe,expert]{otf}
+% 日付のフォーマット
+\usepackage[yyyymmdd]{datetime}
+% テーマ
+\usetheme{metropolis}
+% PDFのしおりの文字化け回避
+\usepackage{atbegshi}
+\ifnum 42146=\euc"A4A2 \AtBeginShipoutFirst{\special{pdf:tounicode EUC-UCS2}}\else
+\AtBeginShipoutFirst{\special{pdf:tounicode 90ms-RKSJ-UCS2}}\fi
+% 数式フォントをサンセリフ体にする
+\renewcommand{\familydefault}{\sfdefault}
+% 日本語フォントをゴシック体にする
+\renewcommand{\kanjifamilydefault}{\gtdefault}
+% ナビゲーションシンボルを非表示
+\setbeamertemplate{navigation symbols}{}
+% フレーム番号を表示
+\setbeamertemplate{footline}[frame number]
+% 目次の表示形式を丸にする
+\setbeamertemplate{section in toc}[circle]
+% セクションごとに目次を挿入
+\AtBeginSection[]{
+    \begin{frame}{目次}
+        \tableofcontents[currentsection,hideallsubsections]
+    \end{frame}
+}
+
+% bibtex
+% \usepackage[backend=biber]{biblatex}
+% \addbibresource{reference.bib}
+
+% \usepackage{inconsolata}
+% \usepackage{hyperref}
+% \usepackage{xcolor}
+% \usepackage{multicol}
+% \usepackage{graphicx}
+% \usepackage{wasysym}
+% \usepackage{mystylefile}
+
+% main
+
+\title{TITLE}
+\date{\today}
+\author{AUTHOR}
+\institute{INSTITUTE}
+
+\begin{document}
+
+\maketitle
+
+\begin{frame}{目次}
+    \tableofcontents[hideallsubsections]
+\end{frame}
+
+\section{SECTION}
+
+\begin{frame}{FRAME}
+    \begin{itemize}
+        \item ITEM
+        \item ITEM
+        \item ITEM
+        \item ITEM
+        \item ITEM
+    \end{itemize}
+\end{frame}
+
+\section{SECTION}
+
+\begin{frame}{FRAME}
+    \begin{itemize}
+        \item ITEM
+    \end{itemize}
+\end{frame}
+
+\end{document}
