@@ -12,3 +12,4 @@ safe_install $script_dir/mystylefile.sty $latex_templates_dir
 safe_install $script_dir/slide.tex $latex_templates_dir
 safe_install $script_dir/report.tex $latex_templates_dir
 safe_install $script_dir/latex-template $local_script_dir 755
+safe_install $script_dir/latexmk-server $local_script_dir 755
