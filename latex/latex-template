@@ -18,3 +18,4 @@ mkdir $target_dir
 cp "$latex_templates_dir/$1.tex" "$target_dir/main.tex"
 cp "$latex_templates_dir/Makefile" $target_dir
 cp "$latex_templates_dir/mystylefile.sty" $target_dir
+cp "$latex_templates_dir/gitignore" "$target_dir/.gitignore"
