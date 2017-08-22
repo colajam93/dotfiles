@@ -13,12 +13,15 @@ if ! installed "brew"; then
     exit 1
 fi
 
+brew update
+brew upgrade
 brew install \
     bash \
     clang-format \
     cmake \
     coreutils \
     diffutils \
+    findutils \
     git \
     gnu-sed \
     grep \
