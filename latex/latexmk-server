@@ -3,6 +3,8 @@
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 latexmk_server_dir="$HOME/.local/share/latexmk-server"
+container_name="texlive"
+container_user="user"
 TRUE="true"
 FALSE="false"
 
@@ -30,7 +32,7 @@ ls_absolute_path() {
 }
 
 print_usage() {
-    echo "latexmk-server [-c] [-k] [-l] TEX_FILENAME"
+    echo "latexmk-server [-c] [-k] [-l] [-m] TEX_FILENAME"
 }
 
 is_running() {
@@ -41,12 +43,75 @@ is_running() {
     return $?
 }
 
+create_pid_file() {
+    pid=$1
+    pid_file="$latexmk_server_dir/$pid"
+    echo $target > $pid_file
+    echo $pid_file
+}
+
+sanity_check() {
+    pid=$1
+    pid_file=$2
+    if ! is_running $pid; then
+        rm -f $pid_file
+        echo "start-up latexmk failed"
+        return 1
+    else
+        echo "pid: $pid"
+        return 0
+    fi
+}
+
+find_pid() {
+    prog_name=$1
+    key=$2
+    r=$(ps axo comm,pid,args | sed 's/\t/ /;s/  */ /' | grep "^$prog_name" | grep "$key")
+    if [[ $(echo "$r" | wc -l) == "1" ]]; then
+        echo "$r" | cut -f 2 -d ' '
+        return 0
+    fi
+}
+
+process_container() {
+    target=$1
+    working_dir=$(dirname $target)
+    sudo -b systemd-nspawn \
+            -a \
+            -M $container_name \
+            -u $container_user \
+            --bind=$working_dir \
+            --chdir=$working_dir \
+            /usr/bin/latexmk -pvc $target &> "$target.latexmk.log"
+    echo "latexmk started. sanity check..."
+    sleep 1
+    pid=$(find_pid "systemd-nspawn" "/usr/bin/latexmk -pvc $target")
+    if [[ $pid == '' ]]; then
+        return 1
+    fi
+    pid_file=$(create_pid_file $pid)
+    sanity_check $pid $pid_file
+    return $?
+}
+
+sudo_kill() {
+    pid=$1
+    owner=$(ps -p $pid -o ruser | sed -n 2p)
+    if [[ $owner == "root" ]]; then
+        echo "sudo kill $pid"
+        sudo kill $pid
+    else
+        echo "kill $pid"
+        kill $pid
+    fi
+}
 
 # main
 
 kill=$FALSE
 cleanup=$FALSE
 list=$FALSE
+container=$FALSE
 for OPT in "$@"
 do
     case "$OPT" in
@@ -60,6 +125,10 @@ do
             ;;
         '-l'|'--list' )
             list=$TRUE
+            shift 1
+            ;;
+        '-m'|'--machine' )
+            container=$TRUE
             shift 1
             ;;
         '--'|'-' )
@@ -85,7 +154,7 @@ if [[ $cleanup == $TRUE ]]; then
         _pid=$(basename $i)
         _pid_file=$i
         if is_running $_pid; then
-            kill $_pid
+            sudo_kill $_pid
         fi
         rm -f $_pid_file
     done
@@ -117,6 +186,11 @@ if ! [[ -e $latexmk_server_dir ]]; then
     mkdir $latexmk_server_dir
 fi
 
+if [[ $container == $TRUE ]]; then
+    process_container $target
+    exit $?
+fi
+
 pid_exits=$FALSE
 running=$FALSE
 for i in $(ls_absolute_path $latexmk_server_dir); do
@@ -141,7 +215,7 @@ for i in $(ls_absolute_path $latexmk_server_dir); do
 done
 
 if [[ $running == $TRUE && $kill == $TRUE ]]; then
-    kill $pid
+    sudo_kill $pid
     rm -f $pid_file
     echo "latexmk was killed"
     echo "target: $target"
