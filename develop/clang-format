@@ -16,4 +16,5 @@ MaxEmptyLinesToKeep: 1
 NamespaceIndentation: None
 DerivePointerAlignment: true
 PointerAlignment: Left
+FixNamespaceComments: true
 ...
