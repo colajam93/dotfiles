@@ -62,9 +62,9 @@ export SYSTEMD_EDITOR=$EDITOR
 export GOPATH="$HOME/local/go"
 export PATH="$PATH:$GOPATH/bin:$HOME/.local/bin"
 
-vewl="virtualenvwrapper_lazy.sh"
-if type $vewl > /dev/null 2>&1; then
-    source $(which $vewl)
+if type "virtualenvwrapper_lazy.sh" > /dev/null 2>&1; then
+    export VIRTUALENVWRAPPER_PYTHON="$(which python3)"
+    source $(which "virtualenvwrapper_lazy.sh")
 fi
 
 # load environment specific file
