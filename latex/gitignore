@@ -2,3 +2,4 @@
 
 # Generated pdf files
 /*.pdf
+/assets/*.pdf
