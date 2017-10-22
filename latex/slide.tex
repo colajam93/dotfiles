@@ -21,17 +21,29 @@
 \setbeamertemplate{section in toc}[circle]
 % セクションごとに目次を挿入
 \AtBeginSection[]{
-    \begin{frame}{目次}
+    \begin{frame}[noframenumbering]{目次}
         \tableofcontents[currentsection,hideallsubsections]
     \end{frame}
 }
+% 数式フォントを変更
+\usefonttheme[onlymath]{serif}
+\usepackage{concrete}
 
-% \usepackage{inconsolata}
-% \usepackage{hyperref}
+% タイプライタ体フォントを変更
+\usepackage{inconsolata}
+
+% URlのためにbibファイルの処理の前に読み込んでおく
+\usepackage{hyperref}
+
+% \usepackage{array}
 % \usepackage{xcolor}
+% \usepackage{colortbl}
+% \usepackage{mathtools}
 % \usepackage{multicol}
 % \usepackage{graphicx}
 % \usepackage{wasysym}
+% \usepackage{amsmath}
+% \usepackage{amssymb}
 % \usepackage{mystylefile}
 
 % bibtex
@@ -58,16 +70,12 @@
 \begin{frame}{FRAME}
     \begin{itemize}
         \item ITEM
-        \item ITEM
-        \item ITEM
-        \item ITEM
-        \item ITEM
     \end{itemize}
 \end{frame}
 
-\section{SECTION}
+\appendix
 
-\begin{frame}{FRAME}
+\begin{frame}[noframenumbering]{Hidden page}
     \begin{itemize}
         \item ITEM
     \end{itemize}

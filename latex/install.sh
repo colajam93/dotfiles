@@ -8,6 +8,7 @@ local_script_dir=$HOME/.local/bin
 install -d $local_script_dir
 install -d $latex_templates_dir
 safe_install $script_dir/Makefile $latex_templates_dir
+safe_install $script_dir/Makefile-assets $latex_templates_dir
 safe_install $script_dir/mystylefile.sty $latex_templates_dir
 safe_install $script_dir/slide.tex $latex_templates_dir
 safe_install $script_dir/report.tex $latex_templates_dir

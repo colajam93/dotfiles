@@ -1,11 +1,13 @@
-main: check main.tex
-	$(MAKE) -C assets
-	latexmk main.tex
+assets: check
+ifneq (,$(wildcard *.tex))
+	latexmk *.tex
+endif
 
 .PHONY: clean
 clean: check
-	$(MAKE) -C assets clean
+ifneq (,$(wildcard *.tex))
 	latexmk -C
+endif
 
 .PHONY: check
 check:
