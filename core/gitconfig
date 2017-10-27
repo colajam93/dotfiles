@@ -2,3 +2,4 @@
 	default = simple
 [alias]
 	co = checkout
+    cp = cherry-pick
