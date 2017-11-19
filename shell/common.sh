@@ -42,8 +42,7 @@ _sc_rlwrap_alias maxima
 
 unset -f _sc_rlwrap_alias
 
-
-if ls --version 2> /dev/null | grep -q 'coreutils'; then
+if ls --help 2>&1 | egrep -q 'coreutils|BusyBox'; then
     alias ls='ls --color=auto'
 else
     alias ls='ls -G'
