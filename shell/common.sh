@@ -47,11 +47,12 @@ if ls --help 2>&1 | egrep -q 'coreutils|BusyBox'; then
 else
     alias ls='ls -G'
 fi
-
 alias cp='cp -i'
 alias mv='mv -i'
 alias rm='rm -i'
-alias grep='grep --color=auto'
+if grep --help 2>&1 | grep -q 'GNU grep'; then
+    alias grep='grep --color=auto'
+fi
 if diff --help 2>&1 | grep -q 'diffutils'; then
     alias diff='diff --color=auto'
 fi
