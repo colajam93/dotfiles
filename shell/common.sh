@@ -37,8 +37,10 @@ _sc_rlwrap_alias() {
     alias "$1=rlwrap $1"
 }
 
-_sc_rlwrap_alias sbcl
-_sc_rlwrap_alias maxima
+if type "rlwrap" &> /dev/null; then
+    _sc_rlwrap_alias sbcl
+    _sc_rlwrap_alias maxima
+fi
 
 unset -f _sc_rlwrap_alias
 
