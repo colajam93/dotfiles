@@ -24,7 +24,7 @@ docker_cleanup() {
     if [ -n "$processes" ]; then
       docker rm $processes
     fi
-    
+
     images=$(docker images -q -f dangling=true)
     if [ -n "$images" ]; then
       docker rmi $images
@@ -52,7 +52,9 @@ alias cp='cp -i'
 alias mv='mv -i'
 alias rm='rm -i'
 alias grep='grep --color=auto'
-alias diff='diff --color=auto'
+if diff --help 2>&1 | grep -q 'diffutils'; then
+    alias diff='diff --color=auto'
+fi
 alias tmux='tmux -2'
 
 # environment variable
