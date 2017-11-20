@@ -8,9 +8,15 @@ keychain-add() {
     keychain --confhost ${hosts[@]}
 }
 
-# get ssh key path from '~/.ssh/config'
 _sc_confpath() {
-    h=""
+    local i
+    for i in ~/.ssh/config ~/.ssh/config.d/*; do
+        _sc_confpath_file $1 < "$i"
+    done
+}
+
+_sc_confpath_file() {
+    local h=""
     while IFS= read -r line; do
         # get the Host directives
         case $line in
@@ -25,8 +31,9 @@ _sc_confpath() {
                     break
                 fi
         esac
-    done < ~/.ssh/config
+    done
 }
+
 
 _sc_keychain_init() {
     if [[ -z ${SSH_AGENT_PID+x} ]]; then
