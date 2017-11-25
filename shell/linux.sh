@@ -1,11 +1,9 @@
-keychain-init() {
-    eval $(keychain --eval --quiet)
-}
+# internal functions
 
-keychain-add() {
-    keychain-init
-    local hosts=$(for i in $@; do _sc_confpath $i; done)
-    keychain --confhost ${hosts[@]}
+_sc_keychain_init() {
+    if [[ -z ${SSH_AGENT_PID+x} ]]; then
+        eval $(keychain --eval --quiet)
+    fi
 }
 
 _sc_confpath() {
@@ -34,30 +32,16 @@ _sc_confpath_file() {
     done
 }
 
+# exported functions
 
-_sc_keychain_init() {
-    if [[ -z ${SSH_AGENT_PID+x} ]]; then
-        keychain-init
-    fi
+keychain-add() {
+    keychain-init
+    local hosts=$(for i in $@; do _sc_confpath $i; done)
+    keychain --confhost ${hosts[@]}
 }
 
-_sc_ssh() {
-    _sc_keychain_init
-    ssh $@
-}
-
-_sc_scp() {
-    _sc_keychain_init
-    scp $@
-}
-
-_sc_rsync() {
-    _sc_keychain_init
-    rsync $@
-}
+# main
 
 if type "keychain" &> /dev/null; then
-    alias ssh=_sc_ssh
-    alias scp=_sc_scp
-    alias rsync=_sc_rsync
+   _sc_keychain_init
 fi
