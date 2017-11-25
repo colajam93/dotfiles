@@ -163,10 +163,5 @@ bar {
 #wallpaper
 exec --no-startup-id feh --bg-scale ~/.i3/wallpaper
 
-#thunderbird always open in 10 workspace
+assign [class="keepassxc"] 9
 assign [class="Thunderbird"] 10
-
-#jd always open in 9 workspace
-assign [class="Jd"] 9
-
-assign [class="Rhythmbox"] 8
