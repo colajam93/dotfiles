@@ -156,7 +156,7 @@ bindsym $mod+r mode "resize"
 #}
 
 bar {
-        status_command source ~/.virtualenvs/i3/bin/activate && python ~/.i3/i3pystatus_config.py
+        status_command ~/.virtualenvs/i3/bin/python ~/.i3/i3pystatus_config.py
         font pango:Ricty, Bold 10
 }
 
