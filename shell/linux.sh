@@ -10,7 +10,7 @@ keychain-add() {
 
 _sc_confpath() {
     local i
-    for i in ~/.ssh/config ~/.ssh/config.d/*; do
+    for i in ~/.ssh/config ~/.ssh/conf.d/*; do
         _sc_confpath_file $1 < "$i"
     done
 }
