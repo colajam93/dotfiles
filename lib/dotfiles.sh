@@ -30,6 +30,14 @@ _backward_match() {
     done
 }
 
+_diff() {
+    if diff --help 2>&1 | grep -q 'diffutils'; then
+        diff --color=auto $@
+    else
+        diff $@
+    fi
+}
+
 join() {
     local d=$1
     shift
@@ -76,7 +84,7 @@ safe_install() {
         echo "$1: No such file or directory"
         return 1
     fi
-        
+
     # destination file
     local destfile
     if [[ -d $2 ]]; then
@@ -112,7 +120,7 @@ safe_install() {
         if [[ "$_dotfiles_force" == "true" ]]; then
             _overwrite_file $destfile_new $destfile_old
         else
-            diff -u --color=auto $destfile_old $destfile_new
+            _diff -u $destfile_old $destfile_new
             echo "overwrite $destfile_old by new file? [y/N]"
             local input
             read input
