@@ -32,18 +32,11 @@ docker_cleanup() {
 }
 
 # alias
-# rlwrap
-_sc_rlwrap_alias() {
-    alias "$1=rlwrap $1"
-}
 
 if type "rlwrap" &> /dev/null; then
-    _sc_rlwrap_alias sbcl
-    _sc_rlwrap_alias maxima
+    alias sbcl='rlwrap sbcl'
+    alias maxima='rlwrap maxima'
 fi
-
-unset -f _sc_rlwrap_alias
-
 if ls --help 2>&1 | egrep -q 'coreutils|BusyBox'; then
     alias ls='ls --color=auto'
 else
@@ -66,7 +59,7 @@ export SYSTEMD_EDITOR=$EDITOR
 export GOPATH="$HOME/local/go"
 export PATH="$PATH:$GOPATH/bin:$HOME/.local/bin"
 
-if type "virtualenvwrapper_lazy.sh" > /dev/null 2>&1; then
+if type "virtualenvwrapper_lazy.sh" &> /dev/null; then
     export VIRTUALENVWRAPPER_PYTHON="$(which python3)"
     source $(which "virtualenvwrapper_lazy.sh")
 fi
