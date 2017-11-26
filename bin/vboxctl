@@ -23,7 +23,7 @@ def list_running_vms():
 
 def parse_v_box_manage_list_output(output):
     pattern = re.compile(
-        r'"(?P<name>[a-zA-Z0-9 ]+)" '
+        r'"(?P<name>.+)" '
         r'{(?P<uuid>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})}')
     m = re.match(pattern, output)
     if not m:
@@ -94,9 +94,34 @@ def do_clone(args):
     run_with_exit_code(command)
 
 
+def show_confirm(message: str, default_yes: bool = False, hide_yn: bool = False) -> bool:
+    prompt = ' [y/N]'
+    if hide_yn:
+        prompt = ''
+    elif default_yes:
+        prompt = ' [Y/n]'
+    mes = f'{message}{prompt} '
+
+    input_ = ''
+    try:
+        input_ = input(mes)
+    except EOFError:
+        pass
+
+    if input_ == '':
+        result = default_yes
+    else:
+        result = input_.lower() == 'y' or input_.lower() == 'yes'
+    return result
+
+
 def do_remove(args):
-    command = [V_BOX_MANAGE, 'unregistervm', args.target, '--delete']
-    run_with_exit_code(command)
+    confirm_ = args.force
+    if not confirm_:
+        confirm_ = show_confirm(message=f"Are you sure to remove '{args.target}'?")
+    if confirm_:
+        command = [V_BOX_MANAGE, 'unregistervm', args.target, '--delete']
+        run_with_exit_code(command)
 
 
 def do_snapshot_list(args):
@@ -110,13 +135,21 @@ def do_snapshot_take(args):
 
 
 def do_snapshot_restore(args):
-    command = [V_BOX_MANAGE, SNAPSHOT, args.target, RESTORE, args.name]
-    run_with_exit_code(command)
+    confirm_ = args.force
+    if not confirm_:
+        confirm_ = show_confirm(message=f"Are you sure to remove '{args.name}'?")
+    if confirm_:
+        command = [V_BOX_MANAGE, SNAPSHOT, args.target, RESTORE, args.name]
+        run_with_exit_code(command)
 
 
 def do_snapshot_remove(args):
-    command = [V_BOX_MANAGE, SNAPSHOT, args.target, 'delete', args.name]
-    run_with_exit_code(command)
+    confirm_ = args.force
+    if not confirm_:
+        confirm_ = show_confirm(message=f"Are you sure to restore '{args.name}'?")
+    if confirm_:
+        command = [V_BOX_MANAGE, SNAPSHOT, args.target, 'delete', args.name]
+        run_with_exit_code(command)
 
 
 def main():
@@ -183,6 +216,7 @@ def main():
         desc = 'remove vm'
         parser_remove = subparsers.add_parser(REMOVE, description=desc, help=desc)
         parser_remove.add_argument('target', help='vm name')
+        parser_remove.add_argument('-f', '--force', action='store_true', help='remove vm without confirmation')
         parser_remove.set_defaults(func=do_remove)
 
     setup_remove_parser(subparsers)
@@ -206,11 +240,13 @@ def main():
         restore_help = 'restore snapshot'
         parser_restore = third_parsers.add_parser(RESTORE, description=restore_help, help=restore_help)
         parser_restore.add_argument('name', help='snapshot name')
+        parser_restore.add_argument('-f', '--force', action='store_true', help='restore snapshot without confirmation')
         parser_restore.set_defaults(func=do_snapshot_restore)
 
         remove_help = 'remove snapshot'
         parser_remove = third_parsers.add_parser(REMOVE, description=remove_help, help=remove_help)
         parser_remove.add_argument('name', help='snapshot name')
+        parser_remove.add_argument('-f', '--force', action='store_true', help='remove snapshot without confirmation')
         parser_remove.set_defaults(func=do_snapshot_remove)
 
     setup_snapshot_parser(subparsers)
