@@ -5,20 +5,25 @@ import subprocess
 import re
 import sys
 import collections
+from typing import List, Dict
+import socket
 
 LIST, LIST_VMS, START, POWEROFF, LOGIN, CLONE, REMOVE, SNAPSHOT, TAKE, RESTORE = (
     'list', 'list-vms', 'start', 'poweroff', 'login', 'clone', 'remove', 'snapshot', 'take', 'restore')
 V_BOX_MANAGE = 'VBoxManage'
 
 
+class VBoxCtlError(Exception):
+    def __init__(self, message) -> None:
+        self.message = message
+
+
 def list_vms():
-    completed = subprocess.run([V_BOX_MANAGE, LIST, 'vms'], stdout=subprocess.PIPE)
-    return completed.stdout.decode().strip()
+    return run_for_output([V_BOX_MANAGE, LIST, 'vms']).strip()
 
 
 def list_running_vms():
-    completed = subprocess.run([V_BOX_MANAGE, LIST, 'runningvms'], stdout=subprocess.PIPE)
-    return completed.stdout.decode().strip()
+    return run_for_output([V_BOX_MANAGE, LIST, 'runningvms']).strip()
 
 
 def parse_v_box_manage_list_output(output):
@@ -27,7 +32,7 @@ def parse_v_box_manage_list_output(output):
         r'{(?P<uuid>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})}')
     m = re.match(pattern, output)
     if not m:
-        raise ValueError
+        raise VBoxCtlError(f'cannot parse {output}')
     vm_item = collections.namedtuple('VMItem', ['name', 'uuid'])
     return vm_item(name=m.group('name'), uuid=m.group('uuid'))
 
@@ -35,6 +40,11 @@ def parse_v_box_manage_list_output(output):
 def run_with_exit_code(command):
     completed = subprocess.run(command)
     sys.exit(completed.returncode)
+
+
+def run_for_output(command: List[str]) -> str:
+    completed = subprocess.run(command, stdout=subprocess.PIPE)
+    return completed.stdout.decode()
 
 
 def do_list_common(args, list_func):
@@ -84,9 +94,116 @@ def do_poweroff(args):
     run_with_exit_code(command)
 
 
-def do_login(args):
-    command = ['ssh', args.target]
-    run_with_exit_code(command)
+def parse_config(raw: str) -> Dict[str, str]:
+    r = {}
+    key_value = re.compile(r'^(?P<k>.*)=(?P<v>.*)$')
+    string_literal = re.compile(r'^"(?P<v>.*)"$')
+    for l in raw.split('\n'):
+        m = re.match(key_value, l)
+        assert m
+        k = m.group('k')
+        v = m.group('v')
+        m = re.match(string_literal, k)
+        if m:
+            key = m.group('v')
+        else:
+            key = k
+
+        m = re.match(string_literal, v)
+        if m:
+            r[key] = m.group('v')
+        else:
+            r[key] = v
+    return r
+
+
+class NicConfig:
+    def __init__(self, nic_number: int, nic_type: str, mac_address: str) -> None:
+        self.nic_number = nic_number
+        self.nic_type = nic_type
+        self.mac_address = mac_address
+
+
+def parse_nic_configs(conf: Dict[str, str]) -> List[NicConfig]:
+    r = []
+    for i in range(1, 9):
+        nic_type = conf[f'nic{i}']
+        if nic_type == 'none':
+            continue
+        mac_address = conf[f'macaddress{i}']
+        r.append(NicConfig(i - 1, nic_type, mac_address))
+    return r
+
+
+def nic_configs(target: str) -> List[NicConfig]:
+    raw_config = run_for_output([V_BOX_MANAGE, 'showvminfo', '--machinereadable', target]).strip()
+    config = parse_config(raw_config)
+    return parse_nic_configs(config)
+
+
+def guest_property(property_: str, target: str) -> str:
+    raw = run_for_output(
+        [V_BOX_MANAGE, 'guestproperty', 'get', target, property_]).strip()
+    p = re.compile(r'^Value: (?P<v>.*)$')
+    m = re.match(p, raw)
+    if m:
+        return m.group('v')
+    else:
+        raise VBoxCtlError(f'vm {target} does not have the property f{property_}')
+
+
+def nic_ip_address(nic_config: NicConfig, target: str) -> str:
+    nic_count = int(guest_property('/VirtualBox/GuestInfo/Net/Count', target))
+    for i in range(nic_count):
+        mac_ = guest_property(f'/VirtualBox/GuestInfo/Net/{i}/MAC', target)
+        if mac_ == nic_config.mac_address:
+            return guest_property(f'/VirtualBox/GuestInfo/Net/{i}/V4/IP', target)
+    raise VBoxCtlError(f'NIC {nic_config.mac_address} has no IP address')
+
+
+def is_listening_ssh(address: str) -> bool:
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.settimeout(0.01)
+    try:
+        s.connect((address, 22))
+        header = s.recv(64).decode()
+        if header.startswith('SSH-2.0-'):
+            return True
+        return False
+    except (ConnectionError, socket.timeout):
+        return False
+
+
+def is_running(target: str) -> bool:
+    raw_vms = list_running_vms().strip()
+    if not raw_vms:
+        return False
+    vms = map(parse_v_box_manage_list_output, raw_vms.split('\n'))
+    for vm in vms:
+        if vm.name == target:
+            return True
+    return False
+
+
+# TODO: add option for NIC, IP, Key, ...
+def do_login(args) -> None:
+    if not is_running(args.target):
+        raise VBoxCtlError(f'vm {args.target} is not running')
+    nic_configs_ = nic_configs(args.target)
+    if len(nic_configs_) == 0:
+        raise VBoxCtlError(f'vm {args.target} has no network interface')
+
+    for i in nic_configs_:
+        if i.nic_type == 'hostonly' or i.nic_type == 'bridged':
+            try:
+                address = nic_ip_address(i, args.target)
+            except VBoxCtlError:
+                continue
+            if is_listening_ssh(address):
+                command = ['ssh', address]
+                run_with_exit_code(command)
+
+    raise VBoxCtlError(f'There is no SSH server on vm {args.target}')
 
 
 def do_clone(args):
