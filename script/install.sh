@@ -3,8 +3,15 @@
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $script_dir/../lib/dotfiles.sh
 
-local_script_dir=$HOME/.local/bin
-install -d $local_script_dir
-foreach_with_generator \
-    "safe_install %s $local_script_dir 755" \
-    "ls_absolute_path $script_dir/../external/scripts/bin"
+install_path=$HOME/.local/share/scripts
+if ! [[ -e $install_path ]]; then
+    echo "Clone https://github.com/colajam93/scripts.git to $install_path"
+    git clone https://github.com/colajam93/scripts.git $install_path
+    cd $install_path
+    bash install.sh
+else
+    cd $install_path
+    echo "Update $install_path"
+    git pull
+    bash install.sh
+fi
