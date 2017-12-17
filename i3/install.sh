@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source $script_dir/../lib/dotfiles.sh
+source $script_dir/../external/libshellscript/libshellscript/libshellscript.sh
 
 if [[ $(platform_name) != "linux" ]]; then
     print_error "platform is not Linux"

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source $script_dir/../lib/dotfiles.sh
+source $script_dir/../external/libshellscript/libshellscript/libshellscript.sh
 
 latex_templates_dir=$HOME/.local/share/latex-templates
 local_script_dir=$HOME/.local/bin
