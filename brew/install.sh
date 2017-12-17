@@ -13,6 +13,7 @@ if ! installed "brew"; then
     exit 1
 fi
 
+print_information "Update HomeBrew"
 brew update
 brew upgrade
 brew install \
