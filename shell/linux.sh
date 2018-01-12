@@ -35,7 +35,7 @@ _sc_confpath_file() {
 # exported functions
 
 keychain-add() {
-    keychain-init
+    _sc_keychain_init
     local hosts=$(for i in $@; do _sc_confpath $i; done)
     keychain --confhost ${hosts[@]}
 }
