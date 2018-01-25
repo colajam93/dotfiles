@@ -7,9 +7,10 @@ status.register("clock",
                 format="%Y-%m-%d(%a) %H:%M:%S")
 
 # Displays master volume
-status.register("alsa",
+status.register("pulseaudio",
                 format="♪:{volume}%",
-                card=1)
+                color_muted="#AAAAAA",
+                )
 
 # Displays speaker state
 status.register("alsa",
