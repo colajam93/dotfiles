@@ -36,10 +36,14 @@ _sc_confpath_file() {
 
 # exported functions
 
-keychain-add() {
-    _sc_keychain_init
+key-add() {
     local hosts=$(for i in $@; do _sc_confpath $i; done)
-    keychain --confhost ${hosts[@]}
+    if type "keychain" &> /dev/null; then
+        _sc_keychain_init
+        keychain --confhost ${hosts[@]}
+    else
+        ssh-add ${hosts[@]}
+    fi
 }
 
 # main
