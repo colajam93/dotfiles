@@ -28,6 +28,13 @@ else
     git pull
 fi
 
+# Color scheme
+color_scheme_path=$HOME/.emacs.d/iceberg-theme.el
+
+if ! [[ -e $color_scheme_path ]]; then
+    curl -L -o $color_scheme_path https://raw.githubusercontent.com/apnsngr/iceberg-emacs/master/iceberg-theme.el
+fi
+
 emacs_config_dir=$HOME/.emacs.d
 install -d $emacs_config_dir
 safe_install $script_dir/init.el $emacs_config_dir
