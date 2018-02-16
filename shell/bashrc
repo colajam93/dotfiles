@@ -11,3 +11,7 @@ complete -cf sudo
 complete -cf man
 
 source $HOME/.shell/common.sh
+
+if [[ -f $HOME/.opam/opam-init/init.sh ]]; then
+    source $HOME/.opam/opam-init/init.sh
+fi

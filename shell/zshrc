@@ -85,3 +85,7 @@ fi
 
 source $ZSH/oh-my-zsh.sh
 source $HOME/.shell/common.sh
+
+if [[ -f $HOME/.opam/opam-init/init.zsh ]]; then
+    source $HOME/.opam/opam-init/init.zsh
+fi
