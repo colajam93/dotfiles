@@ -26,7 +26,6 @@ brew install \
     git \
     gnu-sed \
     grep \
-    macvim \
     nkf \
     python \
     python3 \
