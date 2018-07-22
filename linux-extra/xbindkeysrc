@@ -102,6 +102,11 @@
     m:0x0 + c:123
     XF86AudioRaiseVolume
 
+# Screen lock
+"physlock -d -m"
+    m:0xc + c:46
+    Control+Alt + l
+
 ##################################
 # End of xbindkeys configuration #
 ##################################
