@@ -4,5 +4,7 @@
     "editor.fontFamily": "Ricty,Menlo, Monaco, 'Courier New', monospace",
     "editor.fontSize": 16,
     "editor.renderWhitespace": "boundary",
-    "editor.wordWrap": "on"
+    "editor.wordWrap": "on",
+    "latex-workshop.latex.autoBuild.cleanAndRetry.enabled": false,
+    "latex-workshop.latex.autoBuild.onSave.enabled": false
 }
