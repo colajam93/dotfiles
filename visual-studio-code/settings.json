@@ -1,0 +1,8 @@
+{
+    "telemetry.enableCrashReporter": false,
+    "telemetry.enableTelemetry": false,
+    "editor.fontFamily": "Ricty,Menlo, Monaco, 'Courier New', monospace",
+    "editor.fontSize": 16,
+    "editor.renderWhitespace": "boundary",
+    "editor.wordWrap": "on"
+}
