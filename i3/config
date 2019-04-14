@@ -163,5 +163,6 @@ bar {
 #wallpaper
 exec --no-startup-id feh --bg-scale ~/.i3/wallpaper
 
+assign [class="Kodi"] 8
 assign [class="keepassxc"] 9
 assign [class="Thunderbird"] 10
