@@ -44,6 +44,7 @@ alias tmux='tmux -2'
 # environment variable
 export EDITOR=vim
 export SYSTEMD_EDITOR=$EDITOR
+export PIPENV_VENV_IN_PROJECT=1
 export GOPATH="$HOME/local/go"
 export PATH="$PATH:$GOPATH/bin:$HOME/.local/bin"
 
