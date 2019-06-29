@@ -45,8 +45,7 @@ alias tmux='tmux -2'
 export EDITOR=vim
 export SYSTEMD_EDITOR=$EDITOR
 export PIPENV_VENV_IN_PROJECT=1
-export GOPATH="$HOME/local/go"
-export PATH="$PATH:$GOPATH/bin:$HOME/.local/bin"
+export PATH="$PATH:$HOME/.local/bin"
 
 if type "virtualenvwrapper_lazy.sh" &> /dev/null; then
     export VIRTUALENVWRAPPER_PYTHON="$(which python3)"
