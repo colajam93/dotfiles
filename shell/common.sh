@@ -47,10 +47,6 @@ export SYSTEMD_EDITOR=$EDITOR
 export PIPENV_VENV_IN_PROJECT=1
 export PATH="$PATH:$HOME/.local/bin"
 
-if type "virtualenvwrapper_lazy.sh" &> /dev/null; then
-    export VIRTUALENVWRAPPER_PYTHON="$(which python3)"
-    source $(which "virtualenvwrapper_lazy.sh")
-fi
 
 # load environment specific file
 [[ -f ~/.shell/platform.sh ]] && . ~/.shell/platform.sh
