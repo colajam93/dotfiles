@@ -1,6 +1,0 @@
-colour
-dbus-python
-i3pystatus
-netifaces
-psutil
-pyalsaaudio
