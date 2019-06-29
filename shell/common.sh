@@ -47,7 +47,6 @@ export SYSTEMD_EDITOR=$EDITOR
 export PIPENV_VENV_IN_PROJECT=1
 export PATH="$PATH:$HOME/.local/bin"
 
-
-# load environment specific file
+# load environment specific config
 [[ -f ~/.shell/platform.sh ]] && . ~/.shell/platform.sh
 [[ -f ~/.shell/private.sh ]] && . ~/.shell/private.sh
