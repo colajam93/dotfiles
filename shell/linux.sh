@@ -48,6 +48,11 @@ key-add() {
 
 # main
 
+if [ -n "$DESKTOP_SESSION" ];then
+    eval $(gnome-keyring-daemon --start)
+    export SSH_AUTH_SOCK
+fi
+
 if type "keychain" &> /dev/null; then
    _sc_keychain_init
 fi
