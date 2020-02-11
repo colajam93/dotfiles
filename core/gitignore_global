@@ -295,3 +295,4 @@ $RECYCLE.BIN/
 # End of gim (This .gitignore is managed by gim)
 
 .venv/
+.env
