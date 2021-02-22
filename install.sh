@@ -45,7 +45,7 @@ do
 done
 
 if [[ -z ${param} ]] || [[ ${param[0]} == "default" ]] || [[ ${param[0]} == "all" ]]; then
-    targets=("core" "develop" "emacs" "kube-ps1" "oh-my-zsh" "script" "shell" "vim" )
+    targets=("asdf" "core" "develop" "emacs" "kube-ps1" "oh-my-zsh" "script" "shell" "vim" )
 elif [[ ${param[0]} == "simple" ]]; then
     targets=("core" "shell" "vim-simple")
 else
