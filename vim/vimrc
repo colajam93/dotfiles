@@ -8,6 +8,10 @@ set softtabstop=4
 set autoindent
 set smartindent
 set cursorline
+set incsearch
+set hlsearch
+set ignorecase
+set smartcase
 set laststatus=2 
 set statusline=%F\ %r%m%h%w%=%y\ [%04l/%04L,\ %04v]
 set cino=N-s

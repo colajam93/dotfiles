@@ -21,3 +21,9 @@ repo = 'shiracamus/vim-syntax-x86-objdump-d'
 
 [[plugins]]
 repo = 'cespare/vim-toml'
+
+[[plugins]]
+repo = 'haya14busa/is.vim'
+
+[[plugins]]
+repo = 'tpope/vim-surround'
