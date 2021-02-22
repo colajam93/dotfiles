@@ -120,5 +120,7 @@ fi
 if kubectl &> /dev/null; then
     source <(kubectl completion zsh)
 else
-    kubeoff
+    if command -v kubeoff &> /dev/null; then
+        kubeoff
+    fi
 fi
