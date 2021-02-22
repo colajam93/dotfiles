@@ -49,7 +49,7 @@ DISABLE_AUTO_UPDATE="true"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git)
+plugins=(git aws docker-compose)
 
 # User configuration
 
@@ -80,14 +80,45 @@ plugins=(git)
 
 ZSH_CACHE_DIR=$HOME/.oh-my-zsh-cache
 if [[ ! -d $ZSH_CACHE_DIR ]]; then
-  mkdir $ZSH_CACHE_DIR
+    mkdir $ZSH_CACHE_DIR
 fi
 
 source $ZSH/oh-my-zsh.sh
+
 source $HOME/.shell/common.sh
 
+# opam for bash
 if [[ -f $HOME/.opam/opam-init/init.zsh ]]; then
     source $HOME/.opam/opam-init/init.zsh
 fi
 
-export PROMPT="%{$fg_bold[blue]%}${HOST} $PROMPT"
+# asdf completion for zsh
+# append completions to fpath
+fpath=(${ASDF_DIR}/completions $fpath)
+# initialise completions with ZSH's compinit
+autoload -Uz compinit
+compinit
+
+# AWS completion
+if [[ -e "$HOME/.local/bin/aws_completer" ]]; then
+    complete -C $HOME/.local/bin/aws_completer aws
+fi
+
+# base prompt
+export PROMPT="%{$fg_bold[yellow]%}${AWS_VAULT}${AWS_VAULT:+ }%{$fg_bold[blue]%}${HOST} %{$fg_bold[green]%}[%D{%H:%M:%S}] $PROMPT"
+
+# kube-ps1
+if [[ -e "$HOME/.shell/kube-ps1/kube-ps1.sh" ]]; then
+    source $HOME/.shell/kube-ps1/kube-ps1.sh
+    export KUBE_PS1_NS_ENABLE=false
+    export KUBE_PS1_SYMBOL_ENABLE=false
+    export KUBE_PS1_CTX_COLOR=blue
+    export PROMPT='$(kube_ps1)'$PROMPT
+fi
+
+# kubectl completion
+if kubectl &> /dev/null; then
+    source <(kubectl completion zsh)
+else
+    kubeoff
+fi

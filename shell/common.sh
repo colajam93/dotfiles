@@ -1,5 +1,4 @@
-# function
-
+# Functions
 man() {
     LESS_TERMCAP_mb=$'\E[01;31m' \
     LESS_TERMCAP_md=$'\E[01;38;5;74m' \
@@ -19,8 +18,11 @@ certinfo() {
     echo | openssl s_client -showcerts -servername $1 -connect $1:443 2>/dev/null | openssl x509 -noout -text
 }
 
-# alias
+random_string() {
+    head /dev/urandom | tr -dc A-Za-z0-9 | head -c $1 ; echo ''
+}
 
+# Aliases
 if type "rlwrap" &> /dev/null; then
     alias sbcl='rlwrap sbcl'
     alias maxima='rlwrap maxima'
@@ -41,12 +43,35 @@ if diff --help 2>&1 | grep -q 'diffutils'; then
 fi
 alias tmux='tmux -2'
 
-# environment variable
-export EDITOR=vim
-export SYSTEMD_EDITOR=$EDITOR
-export PIPENV_VENV_IN_PROJECT=1
+# User binary path
 export PATH="$PATH:$HOME/.local/bin"
 
-# load environment specific config
+# Editor
+export EDITOR=vim
+export SYSTEMD_EDITOR=$EDITOR
+
+# Python
+export PIPENV_VENV_IN_PROJECT=1
+if command -v pyenv 1>/dev/null 2>&1; then
+    export PYENV_ROOT="$HOME/.pyenv"
+    eval "$(pyenv init -)"
+    export PATH="$PATH:$PYENV_ROOT/bin"
+fi
+
+# Dcoker
+export DOCKER_BUILDKIT=1
+
+# asdf
+if [[ -e "$HOME/.asdf/asdf.sh" ]]; then
+    . $HOME/.asdf/asdf.sh
+fi
+
+# ghq (depends to asdf)
+if command -v ghq &> /dev/null; then
+    alias ghq-cd='cd $(ghq root)/$(ghq list | fzf)'
+    export GHQ_ROOT=$HOME/work/ghq
+fi
+
+# Load environment specific config
 [[ -f ~/.shell/platform.sh ]] && . ~/.shell/platform.sh
 [[ -f ~/.shell/private.sh ]] && . ~/.shell/private.sh
