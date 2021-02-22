@@ -1,8 +1,0 @@
-export GTK_IM_MODULE=fcitx
-export QT_IM_MODULE=fcitx
-export XMODIFIERS="@im=fcitx"
-export QT_QPA_PLATFORMTHEME="qt5ct"
-
-xbindkeys
-fcitx
-/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1&

@@ -49,7 +49,7 @@ if [[ -z ${param} ]] || [[ ${param[0]} == "default" ]]; then
 elif [[ ${param[0]} == "simple" ]]; then
     targets=("core" "shell" "vim-simple")
 elif [[ ${param[0]} == "all" ]] && [[ $(platform_name) == "linux" ]]; then
-    targets=("core" "develop" "linux-extra" "oh-my-zsh" "script" "shell" "vim" "latex" "emacs")
+    targets=("core" "develop" "oh-my-zsh" "script" "shell" "vim" "latex" "emacs")
 elif [[ ${param[0]} == "all" ]] && [[ $(platform_name) == "mac" ]]; then
     targets=("brew" "core" "develop" "oh-my-zsh" "script" "shell" "vim" "latex" "emacs")
 else
