@@ -52,10 +52,11 @@ export SYSTEMD_EDITOR=$EDITOR
 
 # Python
 export PIPENV_VENV_IN_PROJECT=1
-if command -v pyenv 1>/dev/null 2>&1; then
-    export PYENV_ROOT="$HOME/.pyenv"
-    eval "$(pyenv init -)"
+PYENV_ROOT="$HOME/.pyenv"
+if [[ -d "$PYENV_ROOT" ]]; then
+    export PYENV_ROOT
     export PATH="$PATH:$PYENV_ROOT/bin"
+    eval "$(pyenv init -)"
 fi
 
 # Dcoker
