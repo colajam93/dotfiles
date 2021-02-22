@@ -44,14 +44,10 @@ do
     esac
 done
 
-if [[ -z ${param} ]] || [[ ${param[0]} == "default" ]]; then
-    targets=("core" "develop" "oh-my-zsh" "script" "shell" "vim")
+if [[ -z ${param} ]] || [[ ${param[0]} == "default" ]] || [[ ${param[0]} == "all" ]]; then
+    targets=("core" "develop" "emacs" "oh-my-zsh" "script" "shell" "vim" )
 elif [[ ${param[0]} == "simple" ]]; then
     targets=("core" "shell" "vim-simple")
-elif [[ ${param[0]} == "all" ]] && [[ $(platform_name) == "linux" ]]; then
-    targets=("core" "develop" "oh-my-zsh" "script" "shell" "vim" "emacs")
-elif [[ ${param[0]} == "all" ]] && [[ $(platform_name) == "mac" ]]; then
-    targets=("core" "develop" "oh-my-zsh" "script" "shell" "vim" "emacs")
 else
     targets=("${param[@]}")
 fi
