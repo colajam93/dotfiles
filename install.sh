@@ -51,7 +51,7 @@ elif [[ ${param[0]} == "simple" ]]; then
 elif [[ ${param[0]} == "all" ]] && [[ $(platform_name) == "linux" ]]; then
     targets=("core" "develop" "oh-my-zsh" "script" "shell" "vim" "emacs")
 elif [[ ${param[0]} == "all" ]] && [[ $(platform_name) == "mac" ]]; then
-    targets=("brew" "core" "develop" "oh-my-zsh" "script" "shell" "vim" "emacs")
+    targets=("core" "develop" "oh-my-zsh" "script" "shell" "vim" "emacs")
 else
     targets=("${param[@]}")
 fi
