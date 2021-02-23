@@ -68,9 +68,9 @@ if [[ -e "$HOME/.asdf/asdf.sh" ]]; then
 fi
 
 # ghq (depends to asdf)
+export GHQ_ROOT=$HOME/work/ghq
 if command -v ghq &> /dev/null; then
     alias ghq-cd='cd $(ghq root)/$(ghq list | fzf)'
-    export GHQ_ROOT=$HOME/work/ghq
 fi
 
 # Load environment specific config
