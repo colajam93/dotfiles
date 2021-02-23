@@ -73,6 +73,11 @@ if command -v ghq &> /dev/null; then
     alias ghq-cd='cd $(ghq root)/$(ghq list | fzf)'
 fi
 
+# cargo
+if [[ -e "$HOME/.cargo/env" ]]; then
+    source "$HOME/.cargo/env"
+fi
+
 # Load environment specific config
 [[ -f ~/.shell/platform.sh ]] && . ~/.shell/platform.sh
 [[ -f ~/.shell/private.sh ]] && . ~/.shell/private.sh
