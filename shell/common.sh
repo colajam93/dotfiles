@@ -52,12 +52,6 @@ export SYSTEMD_EDITOR=$EDITOR
 
 # Python
 export PIPENV_VENV_IN_PROJECT=1
-PYENV_ROOT="$HOME/.pyenv"
-if [[ -d "$PYENV_ROOT" ]]; then
-    export PYENV_ROOT
-    export PATH="$PATH:$PYENV_ROOT/bin"
-    eval "$(pyenv init -)"
-fi
 
 # Dcoker
 export DOCKER_BUILDKIT=1
