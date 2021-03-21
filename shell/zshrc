@@ -124,3 +124,8 @@ else
         kubeoff
     fi
 fi
+
+# k3d completion
+if k3d &> /dev/null; then
+    source <(k3d completion zsh)
+fi
