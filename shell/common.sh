@@ -64,7 +64,7 @@ fi
 # ghq (depends to asdf)
 export GHQ_ROOT=$HOME/work/ghq
 if command -v ghq &> /dev/null; then
-    alias ghq-cd='cd $(ghq root)/$(ghq list | fzf)'
+    alias ghq-cd='p=$(ghq list | fzf) && cd "$(ghq root)/$p"'
 fi
 
 # cargo
