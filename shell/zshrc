@@ -129,3 +129,11 @@ fi
 if k3d &> /dev/null; then
     source <(k3d completion zsh)
 fi
+
+# ghq keybind
+_ghq-cd() {
+    ghq-cd
+    zle reset-prompt
+}
+zle -N _ghq-cd
+bindkey '^]' _ghq-cd
