@@ -87,7 +87,7 @@ source $ZSH/oh-my-zsh.sh
 
 source $HOME/.shell/common.sh
 
-# opam for bash
+# opam
 if [[ -f $HOME/.opam/opam-init/init.zsh ]]; then
     source $HOME/.opam/opam-init/init.zsh
 fi
