@@ -92,6 +92,11 @@ if [[ -f $HOME/.opam/opam-init/init.zsh ]]; then
     source $HOME/.opam/opam-init/init.zsh
 fi
 
+# Rust
+# $ rustup completions zsh > ~/.zfunc/_rustup
+# $ rustup completions zsh cargo > ~/.zfunc/_cargo
+fpath+=~/.zfunc
+
 # asdf completion for zsh
 # append completions to fpath
 fpath=(${ASDF_DIR}/completions $fpath)
