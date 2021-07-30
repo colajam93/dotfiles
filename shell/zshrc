@@ -135,6 +135,13 @@ if k3d &> /dev/null; then
     source <(k3d completion zsh)
 fi
 
+# volta
+if [[ -e "$HOME/.volta/bin/volta" ]]; then
+    export VOLTA_HOME=$HOME/.volta
+    export PATH=$PATH:$VOLTA_HOME/bin
+    # $ volta completions zsh > ~/.zfunc/_volta
+fi
+
 # ghq keybind
 _ghq-cd() {
     ghq-cd
