@@ -75,6 +75,9 @@ fi
 # .NET SDK
 export DOTNET_CLI_TELEMETRY_OPTOUT=1
 
+# AWS SAM
+export SAM_CLI_TELEMETRY=0
+
 # Load environment specific config
 [[ -f ~/.shell/platform.sh ]] && . ~/.shell/platform.sh
 [[ -f ~/.shell/private.sh ]] && . ~/.shell/private.sh
