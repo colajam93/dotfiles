@@ -27,7 +27,7 @@ if type "rlwrap" &> /dev/null; then
     alias sbcl='rlwrap sbcl'
     alias maxima='rlwrap maxima'
 fi
-if ls --help 2>&1 | egrep -q 'coreutils|BusyBox'; then
+if ls --help 2>&1 | grep -E -q 'coreutils|BusyBox'; then
     alias ls='ls --color=auto'
 else
     alias ls='ls -G'
