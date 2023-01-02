@@ -136,11 +136,11 @@ if k3d &> /dev/null; then
 fi
 
 # volta
-if [[ -e "$HOME/.volta/bin/volta" ]]; then
-    export VOLTA_HOME=$HOME/.volta
-    export PATH=$VOLTA_HOME/bin:$PATH
-    # $ volta completions zsh > ~/.zfunc/_volta
-fi
+# if [[ -e "$HOME/.volta/bin/volta" ]]; then
+#     export VOLTA_HOME=$HOME/.volta
+#     export PATH=$VOLTA_HOME/bin:$PATH
+#     # $ volta completions zsh > ~/.zfunc/_volta
+# fi
 
 # .NET SDK
 if command -v dotnet &> /dev/null; then
