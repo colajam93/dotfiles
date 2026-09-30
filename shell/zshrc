@@ -158,3 +158,6 @@ _ghq-cd() {
 }
 zle -N _ghq-cd
 bindkey '^]' _ghq-cd
+
+# mise
+eval "$(/home/cla/.local/bin/mise activate zsh)"
