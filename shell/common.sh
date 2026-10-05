@@ -56,16 +56,9 @@ export PIPENV_VENV_IN_PROJECT=1
 # Dcoker
 export DOCKER_BUILDKIT=1
 
-# asdf
-if [[ -e "$HOME/.asdf/asdf.sh" ]]; then
-    . $HOME/.asdf/asdf.sh
-fi
-
-# ghq (depends to asdf)
+# ghq
 export GHQ_ROOT=$HOME/work/ghq
-if command -v ghq &> /dev/null; then
-    alias ghq-cd='p=$(ghq list | fzf) && cd "$(ghq root)/$p"'
-fi
+alias ghq-cd='p=$(ghq list | fzf) && cd "$(ghq root)/$p"'
 
 # cargo
 if [[ -e "$HOME/.cargo/env" ]]; then

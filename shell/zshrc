@@ -97,13 +97,6 @@ fi
 # $ rustup completions zsh cargo > ~/.zfunc/_cargo
 fpath+=~/.zfunc
 
-# asdf completion for zsh
-# append completions to fpath
-fpath=(${ASDF_DIR}/completions $fpath)
-# initialise completions with ZSH's compinit
-autoload -Uz compinit
-compinit
-
 # AWS completion
 if [[ -e "$HOME/.local/bin/aws_completer" ]]; then
     complete -C $HOME/.local/bin/aws_completer aws

@@ -16,8 +16,3 @@ source $HOME/.shell/common.sh
 if [[ -f $HOME/.opam/opam-init/init.sh ]]; then
     source $HOME/.opam/opam-init/init.sh
 fi
-
-# asdf completion for bash
-if [[ -f "$HOME/.asdf/completions/asdf.bash" ]]; then
-    . $HOME/.asdf/completions/asdf.bash
-fi
