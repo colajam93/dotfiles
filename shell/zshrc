@@ -83,6 +83,9 @@ if [[ ! -d $ZSH_CACHE_DIR ]]; then
     mkdir $ZSH_CACHE_DIR
 fi
 
+# add completion path
+fpath+=~/.zfunc
+
 source $ZSH/oh-my-zsh.sh
 
 source $HOME/.shell/common.sh
@@ -91,11 +94,6 @@ source $HOME/.shell/common.sh
 if [[ -f $HOME/.opam/opam-init/init.zsh ]]; then
     source $HOME/.opam/opam-init/init.zsh
 fi
-
-# Rust
-# $ rustup completions zsh > ~/.zfunc/_rustup
-# $ rustup completions zsh cargo > ~/.zfunc/_cargo
-fpath+=~/.zfunc
 
 # AWS completion
 if [[ -e "$HOME/.local/bin/aws_completer" ]]; then
