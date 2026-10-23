@@ -1,63 +1,30 @@
 #!/usr/bin/env bash
 
-script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source $script_dir/external/libshellscript/libshellscript/libshellscript.sh
+DOTFILES_ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)" || exit 1
+source "$DOTFILES_ROOT/vendor/dotfiles-lib/dotfiles-lib.sh" || exit 1
 
-exec_package() {
-    local e
-    for e in "${@}"; do
-        bash "${script_dir}/$e/install.sh"
-    done
-}
-
-# main
-
-# parse options
-force="false"
-quiet="false"
-for OPT in "$@"
-do
-    case "$OPT" in
-        '-f'|'--force' )
-            force="true"
-            shift 1
-            ;;
-        '-q'|'--quiet' )
-            quiet="true"
-            shift 1
-            ;;
-        '--'|'-' )
-            shift 1
-            param+=( "$@" )
-            break
-            ;;
-        -*)
-            echo "$PROGNAME: illegal option -- '$(echo $1 | sed 's/^-*//')'" 1>&2
-            exit 1
-            ;;
-        *)
-            if [[ ! -z "$1" ]] && [[ ! "$1" =~ ^-+ ]]; then
-                param+=( "$1" )
-                shift 1
-            fi
-            ;;
+force=false
+quiet=false
+param=()
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -f|--force) force=true ;;
+        -q|--quiet) quiet=true ;;
+        --|-) shift; param+=("$@"); break ;;
+        -*) printf 'Unknown option: %s\n' "$1" >&2; exit 1 ;;
+        *) param+=("$1") ;;
     esac
+    shift
 done
 
-if [[ -z ${param} ]] || [[ ${param[0]} == "default" ]] || [[ ${param[0]} == "all" ]]; then
-    targets=("core" "develop" "oh-my-zsh" "script" "shell" "vim" )
-elif [[ ${param[0]} == "simple" ]]; then
-    targets=("core" "shell" "vim-simple")
-else
-    targets=("${param[@]}")
-fi
+case ${param[0]:-default} in
+    default|all) targets=(core develop oh-my-zsh script shell vim) ;;
+    simple) targets=(core shell vim-simple) ;;
+    *) targets=("${param[@]}") ;;
+esac
 
-# set global options
-export _dotfiles_force=$force
-export _dotfiles_quiet=$quiet
+export _dfl_force=$force _dfl_quiet=$quiet
 
-exec_package "${targets[@]}"
-
-# unset global options
-unset _dotfiles_force
-unset _dotfiles_quiet
+for target in "${targets[@]}"; do
+    bash "$DOTFILES_ROOT/$target/install.sh" || exit 1
+done
