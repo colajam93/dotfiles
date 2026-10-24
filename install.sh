@@ -26,5 +26,5 @@ esac
 export _dfl_force=$force _dfl_quiet=$quiet
 
 for target in "${targets[@]}"; do
-    bash "$DOTFILES_ROOT/$target/install.sh" || exit 1
+    bash "$DOTFILES_ROOT/dotfiles/$target/install.sh" || exit 1
 done
