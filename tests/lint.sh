@@ -13,6 +13,6 @@ docker run --rm \
     --entrypoint bash \
     "$image" -c 'shellcheck --shell=bash \
         /workspace/install.sh \
-        /workspace/dotfiles/*/install.sh \
+        /workspace/dotfiles/*/install.sh /workspace/dotfiles/*/links.sh \
         /workspace/tests/*.sh \
-        /workspace/tests/cases/*.sh'
+        /workspace/tests/cases/*.sh /workspace/tests/fixtures/*/*.sh'
