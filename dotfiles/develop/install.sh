@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source "$script_dir/../vendor/dotfiles-lib/dotfiles-lib.sh" || exit 1
+source "$script_dir/../../vendor/dotfiles-lib/dotfiles-lib.sh" || exit 1
 
 k9s_dir=$HOME/.k9s
 install -d "$k9s_dir"
