@@ -24,6 +24,14 @@ test_category_from_another_directory() {
     assertEquals 'false false' "$(cat "$test_dir/home/options")"
 }
 
+test_nested_category_from_another_directory() {
+    mkdir -p "$test_dir/repo/dotfiles/lang"
+    mv "$test_dir/repo/dotfiles/test-category" "$test_dir/repo/dotfiles/lang/test-category"
+    run_installer lang/test-category
+    assertEquals 'Nested categories must run successfully' 0 "$?"
+    assertEquals 'false false' "$(cat "$test_dir/home/options")"
+}
+
 test_options_reach_category() {
     run_installer -f -q test-category
     assertEquals 0 "$?"

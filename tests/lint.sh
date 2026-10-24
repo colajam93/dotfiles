@@ -11,8 +11,9 @@ docker run --rm \
     --user "$(id -u):$(id -g)" \
     --mount "type=bind,src=$repo_dir,dst=/workspace,readonly" \
     --entrypoint bash \
-    "$image" -c 'shellcheck --shell=bash \
+    "$image" -c 'shopt -s globstar nullglob
+    shellcheck --shell=bash \
         /workspace/install.sh \
-        /workspace/dotfiles/*/install.sh /workspace/dotfiles/*/links.sh \
+        /workspace/dotfiles/**/install.sh /workspace/dotfiles/**/links.sh \
         /workspace/tests/*.sh \
         /workspace/tests/cases/*.sh /workspace/tests/fixtures/*/*.sh'
