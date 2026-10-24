@@ -7,7 +7,7 @@ My dotfiles
 ```
 git clone https://github.com/colajam93/dotfiles.git .dotfiles
 cd .dotfiles
-bash install.sh
+./install.sh
 ```
 
 ## License
