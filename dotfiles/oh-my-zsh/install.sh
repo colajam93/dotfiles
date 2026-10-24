@@ -8,6 +8,4 @@ mkdir -p "$HOME/.local/share"
 if ! [[ -e $install_path ]]; then
     dfl_print_information "installing Oh My Zsh"
     git clone https://github.com/ohmyzsh/ohmyzsh.git "$install_path"
-else
-    ZSH="$install_path" sh "$install_path/tools/upgrade.sh"
 fi
