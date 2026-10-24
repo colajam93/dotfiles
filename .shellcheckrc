@@ -1,2 +1,4 @@
 source-path=SCRIPTDIR
 external-sources=true
+# Category declarations are selected at runtime and linted separately.
+disable=SC1090
