@@ -281,7 +281,7 @@ skip $PWD/target/existing -> $PWD/source" "$output"
     assertTrue '[[ -L target/nested/new ]]'
 }
 
-test_link_preview_rejects_invalid_plan_without_partial_output() {
+test_link_preview_reports_conflict_without_changes() {
     printf 'old\n' > conflict
     dfl_link_add source target/new
     dfl_link_add source conflict
@@ -289,7 +289,8 @@ test_link_preview_rejects_invalid_plan_without_partial_output() {
     output=$(dfl_link_preview 2> /dev/null)
     code=$?
     assertNotEquals 0 "$code"
-    assertEquals '' "$output"
+    assertEquals "create $PWD/target/new -> $PWD/source
+conflict $PWD/conflict -> $PWD/source (destination already exists)" "$output"
     assertFalse '[[ -e target ]]'
     assertEquals old "$(cat conflict)"
 }
@@ -312,6 +313,187 @@ test_link_preview_empty_plan() {
     assertEquals 0 "$?"
     assertEquals '' "$output"
 }
+
+test_link_apply_logs_create_and_skip() {
+    mkdir target
+    ln -s ../source target/existing
+    dfl_link_add source target/new
+    dfl_link_add source target/existing
+    local output
+    output=$(dfl_link_apply)
+    assertEquals 0 "$?"
+    assertEquals "create $PWD/target/new -> $PWD/source
+skip $PWD/target/existing -> $PWD/source" "$output"
+    assertTrue '[[ -L target/new ]]'
+    assertEquals ../source "$(readlink target/existing)"
+}
+
+test_link_apply_quiet_suppresses_create_and_skip() {
+    dfl_link_add source target/new
+    local output
+    output=$(_dfl_quiet=true dfl_link_apply)
+    assertEquals 0 "$?"
+    assertEquals '' "$output"
+    assertTrue '[[ -L target/new ]]'
+    output=$(_dfl_quiet=true dfl_link_apply)
+    assertEquals 0 "$?"
+    assertEquals '' "$output"
+}
+
+test_link_apply_logs_escaped_paths() {
+    local name=$'config [*]\n' expected output
+    cp source "$name"
+    dfl_link_add "$name" "target/$name"
+    printf -v expected 'create %q -> %q' "$PWD/target/$name" "$PWD/$name"
+    output=$(dfl_link_apply)
+    assertEquals 0 "$?"
+    assertEquals "$expected" "$output"
+    printf -v expected 'skip %q -> %q' "$PWD/target/$name" "$PWD/$name"
+    output=$(dfl_link_apply)
+    assertEquals 0 "$?"
+    assertEquals "$expected" "$output"
+}
+
+test_link_apply_failure_does_not_log_success() {
+    dfl_link_add source target/new
+    local output code
+    output=$(
+        ln() { return 23; }
+        dfl_link_apply
+    )
+    code=$?
+    assertNotEquals 0 "$code"
+    assertEquals '' "$output"
+    assertFalse '[[ -L target/new ]]'
+}
+
+test_link_apply_log_failure_returns_failure() {
+    dfl_link_add source target/new
+    dfl_link_apply > /dev/full 2>/dev/null
+    assertNotEquals 'Failed create output must propagate' 0 "$?"
+    assertTrue '[[ -L target/new ]]'
+    dfl_link_apply > /dev/full 2>/dev/null
+    assertNotEquals 'Failed skip output must propagate' 0 "$?"
+}
+
+
+test_link_preview_reports_all_conflict_kinds() {
+    mkdir directory
+    printf other > other
+    ln -s other different
+    ln -s missing dangling
+    printf blocked > parent
+    ln -s source matching
+    dfl_link_add source directory
+    dfl_link_add source different
+    dfl_link_add source dangling
+    dfl_link_add missing missing-target
+    dfl_link_add source parent/child
+    dfl_link_add source matching
+    dfl_link_add source new/config
+    local output code
+    output=$(_dfl_quiet=true dfl_link_preview)
+    code=$?
+    assertNotEquals 0 "$code"
+    assertEquals "conflict $PWD/directory -> $PWD/source (destination already exists)
+conflict $PWD/different -> $PWD/source (destination already exists)
+conflict $PWD/dangling -> $PWD/source (destination already exists)
+conflict $PWD/missing-target -> $PWD/missing (source does not exist)
+conflict $PWD/parent/child -> $PWD/source (invalid destination)
+skip $PWD/matching -> $PWD/source
+create $PWD/new/config -> $PWD/source" "$output"
+    assertFalse '[[ -e new || -e missing-target ]]'
+    assertEquals other "$(readlink different)"
+    assertEquals missing "$(readlink dangling)"
+    assertEquals blocked "$(cat parent)"
+}
+
+test_link_preview_marks_only_later_overlapping_entries() {
+    mkdir source-dir
+    local order output
+    for order in parent-first child-first; do
+        dfl_link_reset
+        if [[ $order == parent-first ]]; then
+            dfl_link_add source-dir target
+            dfl_link_add source target/config
+        else
+            dfl_link_add source target/config
+            dfl_link_add source-dir target
+        fi
+        dfl_link_add source independent
+        output=$(dfl_link_preview)
+        assertNotEquals 0 "$?"
+        assertEquals 1 "$(printf '%s\n' "$output" | grep -c '^conflict .* (overlapping destinations)$')"
+        assertEquals 2 "$(printf '%s\n' "$output" | grep -c '^create ')"
+        assertEquals create "$(printf '%s\n' "$output" | head -n 1 | cut -d ' ' -f 1)"
+        assertEquals conflict "$(printf '%s\n' "$output" | sed -n '2s/ .*//p')"
+        dfl_link_apply >/dev/null 2>&1
+        assertNotEquals 0 "$?"
+        assertFalse '[[ -e target || -e independent ]]'
+    done
+}
+
+test_link_preview_detects_alias_overlaps_and_duplicates() {
+    mkdir source-dir
+    ln -s source-dir target
+    ln -s source-dir alias
+    dfl_link_add source-dir target
+    dfl_link_add source alias/config
+    dfl_link_add source source-dir/config
+    local output
+    output=$(dfl_link_preview)
+    assertNotEquals 0 "$?"
+    assertEquals 2 "$(printf '%s\n' "$output" | grep -c '^conflict .* (overlapping destinations)$')"
+    assertFalse '[[ -e source-dir/config ]]'
+    assertEquals source-dir "$(readlink target)"
+}
+
+test_link_preview_conflict_paths_are_escaped() {
+    local name=$'conflict [*]\n' output expected
+    printf old > "$name"
+    dfl_link_add source "$name"
+    printf -v expected 'conflict %q -> %q (destination already exists)' "$PWD/$name" "$PWD/source"
+    output=$(dfl_link_preview)
+    assertNotEquals 0 "$?"
+    assertEquals "$expected" "$output"
+    assertEquals 1 "$(printf '%s\n' "$output" | wc -l)"
+}
+
+test_link_preview_reports_all_under_strict_options() {
+    printf old > conflict
+    dfl_link_add source conflict
+    dfl_link_add source new
+    (
+        set -euo pipefail
+        dfl_link_preview
+    ) > output
+    assertNotEquals 0 "$?"
+    assertEquals 2 "$(wc -l < output)"
+    assertFalse '[[ -e new ]]'
+}
+
+test_link_preview_reports_one_reason_per_entry_and_continues() {
+    printf old > conflict
+    dfl_link_add missing conflict
+    dfl_link_add source new
+    local output
+    output=$(dfl_link_preview)
+    assertNotEquals 0 "$?"
+    assertEquals "conflict $PWD/conflict -> $PWD/missing (source does not exist)
+create $PWD/new -> $PWD/source" "$output"
+    dfl_link_apply >/dev/null 2>&1
+    assertNotEquals 0 "$?"
+    assertFalse '[[ -e new || -L new ]]'
+    assertEquals old "$(cat conflict)"
+}
+
+test_link_preview_output_failure_is_returned() {
+    dfl_link_add source new
+    dfl_link_preview >/dev/full 2>/dev/null
+    assertNotEquals 0 "$?"
+    assertFalse '[[ -e new ]]'
+}
+
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 source "$script_dir/../../dotfiles-lib.sh"

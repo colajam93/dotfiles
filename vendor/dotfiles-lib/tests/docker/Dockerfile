@@ -2,7 +2,7 @@ FROM ubuntu:26.04
 
 RUN apt-get update \
     && apt-get install --yes --no-install-recommends \
-        bash coreutils diffutils findutils grep sed ncurses-bin shellcheck shunit2 \
+        bash coreutils diffutils findutils grep sed ncurses-bin shellcheck shunit2 util-linux \
     && rm -rf /var/lib/apt/lists/*
 
 ENV TERM=xterm
