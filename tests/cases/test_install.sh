@@ -585,9 +585,9 @@ test_install_vim_layout() {
 }
 
 test_print_messages() {
-    assertEquals "$(tput setaf 1)error:$(tput sgr0) failure" "$(dfl_print_error failure)"
-    assertEquals "$(tput setaf 3)warning:$(tput sgr0) warning" "$(dfl_print_warning warning)"
-    assertEquals "$(tput setaf 4)information:$(tput sgr0) progress" "$(dfl_print_information progress)"
+    assertEquals "error: failure" "$(dfl_print_error failure)"
+    assertEquals "warning: warning" "$(dfl_print_warning warning)"
+    assertEquals "information: progress" "$(dfl_print_information progress)"
 }
 
 test_print_messages_quiet() {
@@ -770,6 +770,126 @@ test_safe_install_creates_file_with_nounset() {
     assertFalse '[[ -e moved.dotnew ]]'
     assertTrue '[[ -e continued ]]'
 }
+
+test_copy_confirmation_uses_stderr() {
+    printf old > target
+    printf 'n\n' | dfl_safe_install "$LIBSS_TEST_INPUT" target > stdout 2> stderr
+    assertEquals 0 "$?"
+    assertTrue 'grep -q "^information:" stdout'
+    assertFalse 'grep -q "^---\|^+++\|overwrite .*by new file" stdout'
+    assertTrue 'grep -q "^--- .*target" stderr'
+    assertTrue 'grep -q "^+++ .*target.dotnew" stderr'
+    assertTrue 'grep -q "overwrite .*target by new file?" stderr'
+    assertEquals old "$(cat target)"
+}
+
+test_copy_quiet_keeps_confirmation_on_stderr() {
+    printf old > target
+    printf 'y\n' | _dfl_quiet=true dfl_safe_install "$LIBSS_TEST_INPUT" target > stdout 2> stderr
+    assertEquals 0 "$?"
+    assertEquals '' "$(cat stdout)"
+    assertTrue 'grep -q "^--- .*target" stderr'
+    assertTrue 'grep -q "overwrite .*target by new file?" stderr'
+    assertEquals "$LIBSS_TEST_CONTENT" "$(cat target)"
+}
+
+test_copy_force_does_not_prompt_on_stderr() {
+    printf old > target
+    _dfl_force=true dfl_safe_install "$LIBSS_TEST_INPUT" target > stdout 2> stderr
+    assertEquals 0 "$?"
+    assertEquals '' "$(cat stderr)"
+    assertEquals "$LIBSS_TEST_CONTENT" "$(cat target)"
+}
+
+test_copy_failed_prompt_does_not_consume_confirmation() {
+    printf old > target
+    (
+        diff() { return 1; }
+        printf 'y\n' | dfl_safe_install "$LIBSS_TEST_INPUT" target > stdout 2> /dev/full
+    )
+    assertNotEquals 0 "$?"
+    assertEquals old "$(cat target)"
+}
+
+
+test_copy_eof_ends_prompt_line_on_stderr() {
+    printf old > target
+    (
+        set -euo pipefail
+        _dfl_quiet=true dfl_safe_install "$LIBSS_TEST_INPUT" target < /dev/null
+        printf 'next-output\n' >&2
+    ) > stdout 2> stderr
+    assertEquals 0 "$?"
+    assertEquals old "$(cat target)"
+    assertEquals '' "$(cat stdout)"
+    assertTrue 'grep -q "^next-output$" stderr'
+    assertTrue 'grep -q "overwrite .*by new file? \[y/N\] $" stderr'
+}
+
+test_copy_partial_answer_at_eof_is_declined() {
+    printf old > target
+    printf y | _dfl_quiet=true dfl_safe_install "$LIBSS_TEST_INPUT" target > stdout 2> stderr
+    assertEquals 0 "$?"
+    assertEquals old "$(cat target)"
+    assertEquals 10 "$(tail -c 1 stderr | od -An -tu1 | tr -d ' ')"
+}
+
+
+test_copy_source_trailing_newline_is_not_another_file() {
+    local name=$'inputs/name\n'
+    mkdir inputs destination
+    printf regular > inputs/name
+    printf newline > "$name"
+    dfl_safe_install "$name" destination > /dev/null
+    assertEquals 0 "$?"
+    assertTrue "test -f 'destination/${name##*/}'"
+    assertEquals newline "$(cat "destination/${name##*/}")"
+    assertFalse '[[ -e destination/name ]]'
+}
+
+test_copy_destination_trailing_newline_preserves_neighbor() {
+    local target=$'target\n'
+    printf neighbor > target
+    printf old > "$target"
+    _dfl_force=true dfl_safe_install "$LIBSS_TEST_INPUT" "$target" > /dev/null
+    assertEquals 0 "$?"
+    assertEquals "$LIBSS_TEST_CONTENT" "$(cat "$target")"
+    assertEquals neighbor "$(cat target)"
+}
+
+test_dotfile_copy_preserves_trailing_newlines() {
+    local name=$'source\n' directory=$'destination\n'
+    printf newline > "$name"
+    mkdir "$directory"
+    dfl_dotfile_install "$PWD/$name" "$PWD/$directory" > /dev/null
+    assertEquals 0 "$?"
+    assertEquals newline "$(cat "$directory/.$name")"
+    assertFalse "test -e '$directory/.source'"
+}
+
+test_batch_copy_keeps_names_with_and_without_trailing_newline() {
+    mkdir inputs destination
+    printf regular > inputs/name
+    printf newline > $'inputs/name\n'
+    (
+        set -euo pipefail
+        HOME="$PWD/destination" dfl_install_all inputs
+    ) > /dev/null
+    assertEquals 0 "$?"
+    assertEquals regular "$(cat destination/.name)"
+    assertEquals newline "$(cat $'destination/.name\n')"
+}
+
+test_copy_source_symlink_to_trailing_newline_name() {
+    printf newline > $'source\n'
+    ln -s $'source\n' linked
+    mkdir destination
+    dfl_safe_install linked destination > /dev/null
+    assertEquals 0 "$?"
+    assertEquals newline "$(cat $'destination/source\n')"
+    assertFalse '[[ -e destination/source ]]'
+}
+
 
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 

@@ -1,8 +1,3 @@
-_dfl_red=$(tput setaf 1 2> /dev/null)
-_dfl_yellow=$(tput setaf 3 2> /dev/null)
-_dfl_blue=$(tput setaf 4 2> /dev/null)
-_dfl_reset=$(tput sgr0 2> /dev/null)
-
 _dfl_overwrite_file() {
     local destfile_new=$1
     local destfile_old=$2
@@ -25,32 +20,54 @@ _dfl_is_quiet() {
     return $?
 }
 
-dfl_print_error() {
-    if _dfl_is_quiet; then
-        return 0
+_dfl_print_message() {
+    # tput setaf indices: 1=red, 2=green, 3=yellow, 4=blue.
+    local color='' reset=''
+    # Check the descriptor at the call site, including redirection to stderr.
+    if [[ -t 1 && -n ${TERM:-} && ${TERM:-} != dumb ]] &&
+       color=$(tput setaf "$1" 2>/dev/null) &&
+       reset=$(tput sgr0 2>/dev/null); then
+        printf '%s%s%s %s\n' "$color" "$2" "$reset" "$3"
+    else
+        printf '%s %s\n' "$2" "$3"
     fi
-    echo "${_dfl_red}error:${_dfl_reset} $1"
+}
+
+dfl_print_error() {
+    _dfl_is_quiet && return 0
+    _dfl_print_message 1 error: "$1"
 }
 
 dfl_print_warning() {
-    if _dfl_is_quiet; then
-        return 0
-    fi
-    echo "${_dfl_yellow}warning:${_dfl_reset} $1"
+    _dfl_is_quiet && return 0
+    _dfl_print_message 3 warning: "$1"
 }
 
 dfl_print_information() {
-    if _dfl_is_quiet; then
-        return 0
+    _dfl_is_quiet && return 0
+    _dfl_print_message 4 information: "$1"
+}
+
+_dfl_print_link() {
+    local action=$1 destination=$2 source=$3 reason=${4:-} message color
+    case $action in
+        create) color=2 ;; # Green
+        skip) color=4 ;; # Blue
+        conflict) color=1 ;; # Red
+        *) return 1 ;;
+    esac
+    printf -v message '%q -> %q' "$destination" "$source"
+    if [[ -n $reason ]]; then
+        message+=" ($reason)"
     fi
-    echo "${_dfl_blue}information:${_dfl_reset} $1"
+    _dfl_print_message "$color" "$action" "$message"
 }
 
 dfl_safe_install() {
     # source file
     if [[ -e $1 ]]; then
         local srcfile
-        srcfile=$(readlink -f -- "$1") || return 1
+        IFS= read -r -d '' srcfile < <(readlink -fz -- "$1") || return 1
     else
         echo "$1: No such file or directory"
         return 1
@@ -60,10 +77,10 @@ dfl_safe_install() {
     local destfile
     if [[ -d $2 ]]; then
         local filename
-        filename=$(basename -- "$srcfile") || return 1
-        destfile=$(readlink -f -- "$2/$filename") || return 1
+        IFS= read -r -d '' filename < <(basename -z -- "$srcfile") || return 1
+        IFS= read -r -d '' destfile < <(readlink -fz -- "$2/$filename") || return 1
     else
-        destfile=$(readlink -f -- "$2") || return 1
+        IFS= read -r -d '' destfile < <(readlink -fz -- "$2") || return 1
     fi
 
     # if argc == 3, use 3rd argument as permission mode which pass to install -m
@@ -95,11 +112,14 @@ dfl_safe_install() {
             _dfl_overwrite_file "$destfile_new" "$destfile_old"
         else
             local diff_status=0
-            diff --color=auto -u -- "$destfile_old" "$destfile_new" || diff_status=$?
+            diff --color=auto -u -- "$destfile_old" "$destfile_new" >&2 || diff_status=$?
             [[ $diff_status -le 1 ]] || return 1
-            printf 'overwrite %s by new file? [y/N] ' "$destfile_old"
+            printf 'overwrite %s by new file? [y/N] ' "$destfile_old" >&2 || return 1
             local input
-            read -r input || return 0
+            if ! read -r input; then
+                printf '\n' >&2 || return 1
+                return 0
+            fi
             if [[ $input == "y" ]]; then
                 _dfl_overwrite_file "$destfile_new" "$destfile_old"
             fi
@@ -117,8 +137,8 @@ dfl_dotfile_install() {
     # src is not dotfile and dest is directory
     if ! [[ $1 == .* ]] && [[ -d $2 ]]; then
         local filename
-        filename=$(basename -- "$1") || return 1
-        destfile=$(readlink -f -- "$2/.$filename") || return 1
+        IFS= read -r -d '' filename < <(basename -z -- "$1") || return 1
+        IFS= read -r -d '' destfile < <(readlink -fz -- "$2/.$filename") || return 1
     # do nothing
     else
         destfile=$2
@@ -153,7 +173,7 @@ dfl_install_all() {
                 continue 2
             fi
         done
-        srcfile=$(readlink -f -- "$i") || return 1
+        IFS= read -r -d '' srcfile < <(readlink -fz -- "$i") || return 1
         dfl_dotfile_install "$srcfile" "$HOME" || return 1
     done
 }
@@ -265,6 +285,56 @@ dfl_link_check() {
 }
 
 dfl_link_preview() {
+    local i j source destination directory action reason
+    local status=0
+    local destinations=() directories=()
+
+    # Report each entry once; overlaps are reported on the later entry.
+    for i in "${!_dfl_link_sources[@]}"; do
+        source=${_dfl_link_sources[i]}
+        destination=${_dfl_link_destinations[i]}
+        reason=
+        if [[ ! -e $source ]]; then
+            reason='source does not exist'
+        elif ! IFS= read -r -d '' directory < <(_dfl_link_destination "$destination"); then
+            reason='invalid destination'
+        else
+            destination=$directory
+            if [[ -L $destination && -d $destination ]]; then
+                IFS= read -r -d '' directory < <(realpath -ze -- "$destination") || return 1
+            fi
+            for j in "${!destinations[@]}"; do
+                if [[ $destination == "${destinations[j]}" ||
+                      $destination == "${directories[j]%/}/"* ||
+                      ${destinations[j]} == "${directory%/}/"* ]]; then
+                    reason='overlapping destinations'
+                    break
+                fi
+            done
+            destinations+=("$destination")
+            directories+=("$directory")
+            if [[ -z $reason ]] && ! _dfl_link_matches "$source" "$destination" &&
+               [[ -e $destination || -L $destination ]]; then
+                reason='destination already exists'
+            fi
+        fi
+
+        if [[ -n $reason ]]; then
+            _dfl_print_link conflict "$destination" "$source" "$reason" || return 1
+            status=1
+            continue
+        fi
+        action=create
+        if _dfl_link_matches "$source" "$destination"; then
+            action=skip
+        fi
+        _dfl_print_link "$action" "$destination" "$source" || return 1
+    done
+    return "$status"
+}
+
+
+dfl_link_apply() {
     dfl_link_check || return 1
     local i source destination action
     for i in "${!_dfl_link_sources[@]}"; do
@@ -272,26 +342,15 @@ dfl_link_preview() {
         IFS= read -r -d '' destination < <(
             _dfl_link_destination "${_dfl_link_destinations[i]}"
         ) || return 1
-        action=create
         if _dfl_link_matches "$source" "$destination"; then
             action=skip
+        else
+            mkdir -p -- "${destination%/*}/" || return 1
+            ln -sT -- "$source" "$destination" || return 1
+            action=create
         fi
-        printf '%s %q -> %q\n' "$action" "$destination" "$source" || return 1
-    done
-}
-
-dfl_link_apply() {
-    dfl_link_check || return 1
-    local i source destination
-    for i in "${!_dfl_link_sources[@]}"; do
-        source=${_dfl_link_sources[i]}
-        IFS= read -r -d '' destination < <(
-            _dfl_link_destination "${_dfl_link_destinations[i]}"
-        ) || return 1
-        if _dfl_link_matches "$source" "$destination"; then
-            continue
+        if ! _dfl_is_quiet; then
+            _dfl_print_link "$action" "$destination" "$source" || return 1
         fi
-        mkdir -p -- "${destination%/*}/" || return 1
-        ln -sT -- "$source" "$destination" || return 1
     done
 }
