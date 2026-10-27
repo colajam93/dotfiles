@@ -3,20 +3,6 @@
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source "$script_dir/../../vendor/dotfiles-lib/dotfiles-lib.sh" || exit 1
 
-# Proof General
-pg_install_path=$HOME/.emacs.d/lisp/PG
-install -d "$(dirname -- "$pg_install_path")"
-if ! [[ -e $pg_install_path ]]; then
-    dfl_print_information "installing Proof General"
-    git clone --depth 1 https://github.com/ProofGeneral/PG "$pg_install_path"
-    cd "$pg_install_path" || exit 1
-    make
-else
-    cd "$pg_install_path" || exit 1
-    git pull
-    make
-fi
-
 # Evil
 evil_install_path=$HOME/.emacs.d/evil
 install -d "$(dirname -- "$evil_install_path")"
