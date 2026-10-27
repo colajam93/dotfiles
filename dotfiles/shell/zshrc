@@ -90,11 +90,6 @@ source $ZSH/oh-my-zsh.sh
 
 source $HOME/.shell/common.sh
 
-# opam
-if [[ -f $HOME/.opam/opam-init/init.zsh ]]; then
-    source $HOME/.opam/opam-init/init.zsh
-fi
-
 # AWS completion
 if [[ -e "$HOME/.local/bin/aws_completer" ]]; then
     complete -C $HOME/.local/bin/aws_completer aws
