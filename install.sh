@@ -21,7 +21,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 case ${param[0]:-default} in
-    default|all) targets=(core develop oh-my-zsh script shell vim) ;;
+    default|all) targets=(core develop oh-my-zsh shell vim) ;;
     simple) targets=(core shell vim-simple) ;;
     *) targets=("${param[@]}") ;;
 esac
