@@ -60,11 +60,6 @@ export DOCKER_BUILDKIT=1
 export GHQ_ROOT=$HOME/work/ghq
 alias ghq-cd='p=$(ghq list | fzf) && cd "$(ghq root)/$p"'
 
-# cargo
-if [[ -e "$HOME/.cargo/env" ]]; then
-    source "$HOME/.cargo/env"
-fi
-
 # .NET SDK
 export DOTNET_CLI_TELEMETRY_OPTOUT=1
 
