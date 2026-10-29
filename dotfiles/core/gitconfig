@@ -20,6 +20,9 @@
 [pull]
     ff = only
 
+[fetch]
+    prune = true
+
 [interactive]
     diffFilter = delta --color-only
 
