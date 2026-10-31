@@ -1,11 +1,8 @@
 # Path to your oh-my-zsh installation.
 ZSH=$HOME/.local/share/oh-my-zsh/
 
-# Set name of the theme to load.
-# Look in ~/.oh-my-zsh/themes/
-# Optionally, if you set this to "random", it'll load a random theme each
-# time that oh-my-zsh is loaded.
-ZSH_THEME="robbyrussell"
+# Starship manages the prompt.
+ZSH_THEME=""
 
 # Uncomment the following line to use case-sensitive completion.
 CASE_SENSITIVE="true"
@@ -95,25 +92,9 @@ if [[ -e "$HOME/.local/bin/aws_completer" ]]; then
     complete -C $HOME/.local/bin/aws_completer aws
 fi
 
-# base prompt
-export PROMPT="%{$fg_bold[yellow]%}${AWS_VAULT}${AWS_VAULT:+ }%{$fg_bold[blue]%}${HOST} %{$fg_bold[green]%}[%D{%H:%M:%S}] $PROMPT"
-
-# kube-ps1
-if [[ -e "$HOME/.shell/kube-ps1/kube-ps1.sh" ]]; then
-    source $HOME/.shell/kube-ps1/kube-ps1.sh
-    export KUBE_PS1_NS_ENABLE=false
-    export KUBE_PS1_SYMBOL_ENABLE=false
-    export KUBE_PS1_CTX_COLOR=blue
-    export PROMPT='$(kube_ps1)'$PROMPT
-fi
-
 # kubectl completion
 if kubectl &> /dev/null; then
     source <(kubectl completion zsh)
-else
-    if command -v kubeoff &> /dev/null; then
-        kubeoff
-    fi
 fi
 
 # k3d completion
@@ -140,3 +121,9 @@ bindkey '^]' _ghq-cd
 
 # mise
 eval "$(/home/cla/.local/bin/mise activate zsh)"
+
+# Keep a basic prompt when Starship is not installed.
+PROMPT='%m [%D{%H:%M:%S}] %1~ %# '
+if command -v starship &> /dev/null; then
+    eval "$(starship init zsh)"
+fi
