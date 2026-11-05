@@ -87,11 +87,6 @@ source $ZSH/oh-my-zsh.sh
 
 source $HOME/.shell/common.sh
 
-# AWS completion
-if [[ -e "$HOME/.local/bin/aws_completer" ]]; then
-    complete -C $HOME/.local/bin/aws_completer aws
-fi
-
 # kubectl completion
 if kubectl &> /dev/null; then
     source <(kubectl completion zsh)
@@ -121,6 +116,11 @@ bindkey '^]' _ghq-cd
 
 # mise
 eval "$("$HOME/.local/bin/mise" activate zsh)"
+
+# AWS completion
+if command -v aws_completer &> /dev/null ; then
+    complete -C aws_completer aws
+fi
 
 # Keep a basic prompt when Starship is not installed.
 PROMPT='%m [%D{%H:%M:%S}] %1~ %# '
