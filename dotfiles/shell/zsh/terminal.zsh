@@ -1,0 +1,204 @@
+# Adapted from Oh My Zsh termsupport.zsh; see dotfiles/shell/OMZ-LICENSE.txt in this repository.
+zmodload zsh/terminfo
+zmodload zsh/langinfo
+
+_dotfiles_uri_encode() {
+    emulate -L zsh
+    local text=$1 encoding=$langinfo[CODESET]
+    case $encoding in
+        UTF-8|utf8|US-ASCII) ;;
+        *) text=$(printf '%s' "$text" | iconv -f "$encoding" -t UTF-8) || return 1 ;;
+    esac
+    local LC_ALL=C byte hex
+    local safe='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789;/?:@&=+$,_.!~*()-'
+    local -i i
+    REPLY=
+    for (( i=1; i<=${#text}; i++ )); do
+        byte=$text[i]
+        if [[ $safe == *"$byte"* ]]; then
+            REPLY+=$byte
+        else
+            printf -v hex '%%%02X' "'$byte"
+            REPLY+=$hex
+        fi
+    done
+}
+
+# Set terminal window and tab/icon title
+#
+# usage: title short_tab_title [long_window_title]
+#
+# See: http://www.faqs.org/docs/Linux-mini/Xterm-Title.html#ss3.1
+# Fully supports screen, iterm, and probably most modern xterm and rxvt
+# (In screen, only short_tab_title is used)
+function _dotfiles_title {
+  setopt localoptions nopromptsubst
+
+  # Don't set the title if inside emacs, unless using vterm
+  [[ -n "${INSIDE_EMACS:-}" && "$INSIDE_EMACS" != vterm ]] && return
+
+  # if $2 is unset use $1 as default
+  # if it is set and empty, leave it as is
+  : ${2=$1}
+
+  local tab="${(%)1}" window="${(%)2}"
+  tab=${tab//[[:cntrl:]]/}
+  window=${window//[[:cntrl:]]/}
+
+  case "$TERM" in
+    cygwin|xterm*|putty*|rxvt*|konsole*|ansi|mlterm*|alacritty*|st*|foot*|contour*|wezterm*|nsterm*)
+      printf '\e]2;%s\a' "$window" # set window name
+      printf '\e]1;%s\a' "$tab" # set tab name
+      ;;
+    screen*|tmux*)
+      printf '\e]2;%s\e\\' "$window" # set tmux pane title
+      printf '\ek%s\e\\' "$tab" # set screen hardstatus/tmux window name if `allow-rename` is on
+      ;;
+    *)
+      case "$TERM_PROGRAM" in
+      "iTerm.app"|"Apple_Terminal")
+        printf '\e]2;%s\a' "$window" # set window name
+        printf '\e]1;%s\a' "$tab" # set tab name
+        ;;
+      *)
+        # Try to use terminfo to set the title if the feature is available
+        if (( ${+terminfo[fsl]} && ${+terminfo[tsl]} )); then
+          # Emit the capabilities with echoti so terminfo does its own parameter
+          # substitution: some terminals (vt320) take a column argument, and
+          # running prompt expansion over the capability string mangles it.
+          echoti tsl 0
+          printf '%s' "$tab"
+          echoti fsl
+        fi
+        ;;
+      esac
+      ;;
+  esac
+}
+
+DOTFILES_TERM_TAB_TITLE_IDLE="%15<..<%~%<<" #15 char left truncated PWD
+DOTFILES_TERM_TITLE_IDLE="%n@%m:%~"
+# Avoid duplication of directory in terminals with independent dir display
+if [[ "$TERM_PROGRAM" == Apple_Terminal ]]; then
+  DOTFILES_TERM_TITLE_IDLE="%n@%m"
+fi
+
+# Runs before showing the prompt
+function _dotfiles_terminal_precmd {
+  [[ "${DISABLE_AUTO_TITLE:-}" != true ]] || return 0
+  _dotfiles_title "$DOTFILES_TERM_TAB_TITLE_IDLE" "$DOTFILES_TERM_TITLE_IDLE"
+}
+
+# Runs before executing the command
+function _dotfiles_terminal_preexec {
+  [[ "${DISABLE_AUTO_TITLE:-}" != true ]] || return 0
+
+  emulate -L zsh
+  setopt extended_glob
+
+  # split command into array of arguments
+  local -a cmdargs
+  cmdargs=("${(z)2}")
+  # if running fg, extract the command from the job description
+  if [[ "${cmdargs[1]}" = fg ]]; then
+    # get the job id from the first argument passed to the fg command
+    local job_id jobspec="${cmdargs[2]#%}"
+    # logic based on jobs arguments:
+    # http://zsh.sourceforge.net/Doc/Release/Jobs-_0026-Signals.html#Jobs
+    # https://www.zsh.org/mla/users/2007/msg00704.html
+    case "$jobspec" in
+      <->) # %number argument:
+        # use the same <number> passed as an argument
+        job_id=${jobspec} ;;
+      ""|%|+) # empty, %% or %+ argument:
+        # use the current job, which appears with a + in $jobstates:
+        # suspended:+:5071=suspended (tty output)
+        job_id=${(k)jobstates[(r)*:+:*]} ;;
+      -) # %- argument:
+        # use the previous job, which appears with a - in $jobstates:
+        # suspended:-:6493=suspended (signal)
+        job_id=${(k)jobstates[(r)*:-:*]} ;;
+      [?]*) # %?string argument:
+        # use $jobtexts to match for a job whose command *contains* <string>
+        job_id=${(k)jobtexts[(r)*${(Q)jobspec}*]} ;;
+      *) # %string argument:
+        # use $jobtexts to match for a job whose command *starts with* <string>
+        job_id=${(k)jobtexts[(r)${(Q)jobspec}*]} ;;
+    esac
+
+    # override preexec function arguments with job command
+    if [[ -n "${jobtexts[$job_id]}" ]]; then
+      1="${jobtexts[$job_id]}"
+      2="${jobtexts[$job_id]}"
+    fi
+  fi
+
+  # cmd name only, or if this is sudo or ssh, the next cmd
+  local CMD="${1[(wr)^(*=*|sudo|ssh|mosh|rake|-*)]:gs/%/%%}"
+  local LINE="${2:gs/%/%%}"
+
+  _dotfiles_title "$CMD" "%100>...>${LINE}%<<"
+}
+
+autoload -Uz add-zsh-hook
+
+if [[ -z "$INSIDE_EMACS" || "$INSIDE_EMACS" = vterm ]]; then
+  add-zsh-hook precmd _dotfiles_terminal_precmd
+  add-zsh-hook preexec _dotfiles_terminal_preexec
+fi
+
+# Keep terminal emulator's current working directory correct,
+# even if the current working directory path contains symbolic links
+#
+# References:
+# - Apple's Terminal.app: https://superuser.com/a/315029
+# - iTerm2: https://iterm2.com/documentation-escape-codes.html (iTerm2 Extension / CurrentDir+RemoteHost)
+# - Konsole: https://bugs.kde.org/show_bug.cgi?id=327720#c1
+# - libvte (gnome-terminal, mate-terminal, …): https://bugzilla.gnome.org/show_bug.cgi?id=675987#c14
+#   Apparently it had a bug before ~2012 were it would display the unknown OSC 7 code
+#
+# As of May 2021 mlterm, PuTTY, rxvt, screen, termux & xterm simply ignore the unknown OSC.
+
+# Don't define the function if we're inside Emacs or in an SSH session (#11696)
+if [[ -n "$INSIDE_EMACS" || -n "$SSH_CLIENT" || -n "$SSH_TTY" ]]; then
+  return
+fi
+
+# Don't define the function if we're in an unsupported terminal
+case "$TERM" in
+  # all of these either process OSC 7 correctly or ignore entirely
+  xterm*|putty*|rxvt*|konsole*|mlterm*|alacritty*|screen*|tmux*) ;;
+  contour*|foot*) ;;
+  *)
+    # Terminal.app and iTerm2 process OSC 7 correctly
+    case "$TERM_PROGRAM" in
+      Apple_Terminal|iTerm.app) ;;
+      *) return ;;
+    esac ;;
+esac
+
+# Emits the control sequence to notify many terminal emulators
+# of the cwd
+#
+# Identifies the directory using a file: URI scheme, including
+# the host name to disambiguate local vs. remote paths.
+function _dotfiles_terminal_cwd {
+  setopt localoptions unset
+  # Percent-encode the host and path names.
+  local URL_HOST URL_PATH REPLY
+  _dotfiles_uri_encode "$HOST" || return 1
+  URL_HOST=$REPLY
+  _dotfiles_uri_encode "$PWD" || return 1
+  URL_PATH=$REPLY
+
+  # Konsole errors if the HOST is provided
+  [[ -z "$KONSOLE_PROFILE_NAME" && -z "$KONSOLE_DBUS_SESSION"  ]] || URL_HOST=""
+
+  # common control sequence (OSC 7) to set current host and path
+  printf "\e]7;file://%s%s\e\\" "${URL_HOST}" "${URL_PATH}"
+}
+
+# Use a precmd hook instead of a chpwd hook to avoid contaminating output
+# i.e. when a script or function changes directory without `cd -q`, chpwd
+# will be called the output may be swallowed by the script or function.
+add-zsh-hook precmd _dotfiles_terminal_cwd
