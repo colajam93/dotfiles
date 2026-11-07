@@ -27,20 +27,12 @@ if type "rlwrap" &> /dev/null; then
     alias sbcl='rlwrap sbcl'
     alias maxima='rlwrap maxima'
 fi
-if ls --help 2>&1 | grep -E -q 'coreutils|BusyBox'; then
-    alias ls='ls --color=auto'
-else
-    alias ls='ls -G'
-fi
+alias ls='ls --color=auto'
 alias cp='cp -i'
 alias mv='mv -i'
 alias rm='rm -i'
-if grep --help 2>&1 | grep -q 'GNU grep'; then
-    alias grep='grep --color=auto'
-fi
-if diff --help 2>&1 | grep -q 'diffutils'; then
-    alias diff='diff --color=auto'
-fi
+alias grep='grep --color=auto'
+alias diff='diff --color=auto'
 alias tmux='tmux -2'
 
 # User binary path
