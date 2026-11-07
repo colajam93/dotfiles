@@ -15,5 +15,6 @@ docker run --rm \
     shellcheck --shell=bash \
         /workspace/install.sh \
         /workspace/dotfiles/**/install.sh /workspace/dotfiles/**/links.sh \
+        /workspace/dotfiles/shell/bin/update-zsh-completions.sh \
         /workspace/tests/*.sh \
         /workspace/tests/cases/*.sh /workspace/tests/fixtures/*/*.sh'
