@@ -5,7 +5,7 @@ script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 repo_dir="$(cd -- "$script_dir/.." && pwd)"
 image="dotfiles-tests:ubuntu-26.04"
 
-docker build --tag "$image" - < "$repo_dir/vendor/dotfiles-lib/tests/docker/Dockerfile"
+docker build --tag "$image" - < "$repo_dir/tests/docker/Dockerfile"
 docker run --rm \
     --network none \
     --user "$(id -u):$(id -g)" \

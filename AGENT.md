@@ -10,14 +10,16 @@
 - Test public behavior rather than implementation details. For new behavior or
   bugs, reproduce the failure first, make the smallest fix, then refactor. Add
   passing characterization tests before refactoring existing behavior.
+- Avoid tests that only repeat aliases, option values, or key bindings from the
+  configuration. Test behavior, failure handling, and integration instead.
 - Use test-only categories to verify the installer entry point. Do not duplicate
   the actual deployment file list in tests.
 - Run `./tests/run.sh` and `./tests/lint.sh` in Docker and check `git diff --check`
   for installer or test changes. Use a temporary HOME for installation checks;
   do not apply configurations to the real home unless explicitly requested.
   Do not install test dependencies on the host with pacman.
-- Keep tests in `tests/cases/` and reuse the Dockerfile from
-  `vendor/dotfiles-lib/tests/docker/`. Keep ShellCheck settings in `.shellcheckrc`
+- Keep tests in `tests/cases/` and use the Dockerfile at
+  `tests/docker/Dockerfile`. Keep ShellCheck settings in `.shellcheckrc`
   rather than adding configuration comments to installers.
 - Treat `vendor/dotfiles-lib` as a Git subtree. Make shared-library changes in
   the dotfiles-lib repository and import them separately.
