@@ -1,0 +1,11 @@
+" Resolve the repository path behind ~/.vimrc's symlink.
+let s:config_dir = fnamemodify(resolve(expand('<sfile>:p')), ':h')
+let s:common_dir = fnamemodify(s:config_dir, ':h') . '/common'
+
+execute 'source' fnameescape(s:common_dir . '/options.vim')
+
+execute 'source' fnameescape(s:config_dir . '/plugins.vim')
+call DotfilesPlugins(s:common_dir . '/plugins.json')
+
+" Apply the colorscheme after plugin paths are available.
+execute 'source' fnameescape(s:common_dir . '/appearance.vim')

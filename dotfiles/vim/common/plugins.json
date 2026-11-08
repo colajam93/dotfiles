@@ -1,0 +1,4 @@
+[
+  { "name": "iceberg.vim", "src": "https://github.com/cocopon/iceberg.vim.git" },
+  { "name": "vim-surround", "src": "https://github.com/tpope/vim-surround.git" }
+]
