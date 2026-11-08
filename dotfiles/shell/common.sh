@@ -39,7 +39,11 @@ alias tmux='tmux -2'
 export PATH="$PATH:$HOME/.local/bin"
 
 # Editor
-export EDITOR=vim
+if command -v nvim >/dev/null 2>&1; then
+    export EDITOR=nvim
+else
+    export EDITOR=vim
+fi
 export SYSTEMD_EDITOR=$EDITOR
 
 # Python
