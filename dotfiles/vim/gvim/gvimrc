@@ -1,9 +1,9 @@
-if has("unix")
-    let s:uname_s = substitute(system("uname -s"), '\n', '', '')
-    if s:uname_s == "Darwin"
-        set guifont=Ricty\ Regular:h16
-    elseif s:uname_s == "Linux"
-        set guifont=Ricty\ Regular\ 13
+if has('gui_gtk') && executable('fc-match')
+    " Fontconfig may return a fallback, so require the exact family name.
+    let s:font = trim(system('fc-match -f "%{family}" HackGen'))
+    if v:shell_error == 0 && s:font ==# 'HackGen'
+        set guifont=HackGen\ 13
     endif
 endif
+
 set visualbell t_vb=
